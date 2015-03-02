@@ -127,7 +127,7 @@ void uartInit()
 
 // Handlers
 
-// USART2 Rx/Tx IRQ Handler
+// USART1 Rx/Tx IRQ Handler
 void UART_IRQHandler(void)
 {
     serialPort_t *s = &serialPort1;

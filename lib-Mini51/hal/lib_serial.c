@@ -34,6 +34,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "projectsettings.h"
 #include "drv_serial.h"
 
+// for semihosting
+static const int SYS_WRITEC = 0x03;
+static const int SYS_WRITE0 = 0x04;
+
 static serialPort_t *lib_serial_getport(unsigned char serialportnumber)
 {
     switch (serialportnumber) {
@@ -77,16 +81,31 @@ void lib_serial_initport(unsigned char serialportnumber, long baud)
 
 void lib_serial_sendchar(unsigned char serialportnumber, unsigned char c)
 {
+    if(serialportnumber == SEMIHOSTPORTNUMBER) {
     // add a character to the send buffer
-    serialPort_t *port = lib_serial_getport(serialportnumber);
-    uartWrite(port, c);
+	    asm volatile ("mov r0, %0\n\t"
+		    "mov r1, %1\n\t"
+            "bkpt 0xAB \n\t"
+	    "nop \n\t" : :"I" (SYS_WRITEC), "l" ((int)&c): );
+    } else {
+        serialPort_t *port = lib_serial_getport(serialportnumber);
+        uartWrite(port, c);
+    }
 }
    
 void lib_serial_sendstring(unsigned char serialportnumber, char *string)
 {
+    if(serialportnumber == SEMIHOSTPORTNUMBER) {
+    // add a character to the send buffer
+	    asm volatile ("mov r0, %0\n\t"
+		    "mov r1, %1\n\t"
+            "bkpt 0xAB\n\t" 
+            "nop \n\t" : :"I" (SYS_WRITE0), "l" (string): );
+    } else {
     // adds the string to the output buffer.
     while (*string) 
         lib_serial_sendchar(serialportnumber, *string++);
+    }
 }
 
 void lib_serial_senddata(unsigned char serialportnumber, unsigned char *data, int datalength)
@@ -98,21 +117,35 @@ void lib_serial_senddata(unsigned char serialportnumber, unsigned char *data, in
 
 int lib_serial_numcharsavailable(unsigned char serialportnumber)
 {
-    // returns number of characters available in the rx buffer
-    serialPort_t *port = lib_serial_getport(serialportnumber);
-    return uartAvailable(port);
+    // semihosting debug TBD
+    if(serialportnumber == SEMIHOSTPORTNUMBER) {
+        return 0;
+    } else {
+        // returns number of characters available in the rx buffer
+        serialPort_t *port = lib_serial_getport(serialportnumber);
+        return uartAvailable(port);
+    }
 }
 
 unsigned char lib_serial_getchar(unsigned char serialportnumber)
 {
-    // get the next character from the serial port
-    serialPort_t *port = lib_serial_getport(serialportnumber);
-    return uartRead(port);
+    // semihosting debug TBD
+    if(serialportnumber == SEMIHOSTPORTNUMBER) {
+        return 0;
+    } else {
+        // get the next character from the serial port
+        serialPort_t *port = lib_serial_getport(serialportnumber);
+        return uartRead(port);
+    }
 }
 
 void lib_serial_getdata(unsigned char serialportnumber, unsigned char *data, int numchars)
 {
+    // semihosting debug TBD
+    if(serialportnumber == SEMIHOSTPORTNUMBER) {
+    } else {
     int x;
     for (x = 0; x < numchars; ++x)
         *data++ = lib_serial_getchar(serialportnumber);
+    }
 }

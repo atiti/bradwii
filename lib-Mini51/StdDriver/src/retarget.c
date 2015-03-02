@@ -20,7 +20,7 @@
 #endif
 
 /* Un-comment this line to disable all printf and getchar. getchar() will always return 0x00*/
-//#define DISABLE_UART
+#define DISABLE_UART
 
 /*---------------------------------------------------------------------------------------------------------*/
 /* Global variables                                                                                        */

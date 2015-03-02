@@ -35,10 +35,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // inittimers();
 //    lib_timers_delaymilliseconds(500) {}
 
-// cycles per microsecond
-static volatile uint32_t usTicks = 0;
 // current uptime for 1kHz systick timer. will rollover after 49 days. hopefully we won't care.
 static volatile uint32_t sysTickUptime = 0;
+static uint32_t sysTickLimit;
 
 // SysTick
 void SysTick_Handler(void)
@@ -50,7 +49,8 @@ void SysTick_Handler(void)
 void lib_timers_init(void)
 {                               
     // SysTick
-    SysTick_Config(SystemCoreClock / 1000);
+    sysTickLimit = SystemCoreClock / 1000;
+    SysTick_Config(sysTickLimit);
 }
 
 uint32_t lib_timers_getcurrentmicroseconds(void)
@@ -61,9 +61,9 @@ uint32_t lib_timers_getcurrentmicroseconds(void)
         ms = sysTickUptime;
         cycle_cnt = SysTick->VAL;
     } while (ms != sysTickUptime);
-    return (ms * 1000) + (CyclesPerUs * 1000 - cycle_cnt) / CyclesPerUs;
+    // goebish timer patch, modified by victzh for performance and clarity
+    return (ms * 1000) + (sysTickLimit - cycle_cnt) / CyclesPerUs;
 }
-
 
 unsigned long lib_timers_gettimermicroseconds(unsigned long starttime)
 {

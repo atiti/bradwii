@@ -182,9 +182,10 @@ static void reset_beken(void)
 static void initialize_beken(void)
 {
     NRF24L01_Activate(0x53); // magic for BK2421/BK2423 bank switch
-    printf("Trying to switch banks\n");
+		printf("Trying to switch banks\n");
+	
     if (NRF24L01_ReadReg(NRF24L01_07_STATUS) & 0x80) {
-        printf("BK2421 detected\n");
+				printf("BK2421 detected\n");
         // Beken registers don't have such nice names, so we just mention
         // them by their numbers
         // It's all magic, eavesdropped from real transfer and not even from the
@@ -207,7 +208,7 @@ static void initialize_beken(void)
 
         NRF24L01_WriteRegisterMulti(0x04, (uint8_t *) "\xC7\x96\x9A\x1B", 4);
         NRF24L01_WriteRegisterMulti(0x04, (uint8_t *) "\xC1\x96\x9A\x1B", 4);
-    } else {
+    } else {			
         printf("nRF24L01 detected\n");
     }
     NRF24L01_Activate(0x53); // switch bank back

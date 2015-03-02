@@ -32,3 +32,4 @@ void lib_serial_setrxcallback(unsigned char serialportnumber,serialcallbackfunct
 
 
 #define USBPORTNUMBER 5
+#define SEMIHOSTPORTNUMBER 6

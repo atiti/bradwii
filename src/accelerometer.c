@@ -1,5 +1,5 @@
 /* 
-Copyright 2013 Brad Quick
+Copyright 2013-2014 Brad Quick
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -29,7 +29,44 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 extern globalstruct global;
 
-#if (ACCELEROMETER_TYPE==BMA180)
+#if (ACCELEROMETER_TYPE==MC3210)
+
+#if !defined(MC3210_ADDRESS)
+#define MC3210_ADDRESS	0x4C
+#endif
+
+void initacc(void)
+{
+    lib_timers_delaymilliseconds(10);
+    // Mode register: standby mode
+    lib_i2c_writereg( MC3210_ADDRESS, 0x07, 0x03);
+    // INTEN register: disable interrupts
+    lib_i2c_writereg( MC3210_ADDRESS, 0x06, 0x00);
+    // OUTCFG register:
+    // Select +/- 8g range, 14-bit resolution
+    // Low-pass filter set to 64 Hz bandwidth
+    // (GINT interrupt updates at LPF bandwidth setting)
+    lib_i2c_writereg( MC3210_ADDRESS, 0x20, 0xBF);
+    // Mode register: wake mode
+    lib_i2c_writereg( MC3210_ADDRESS, 0x07, 0x01);
+}
+
+void readacc(void)
+{
+    unsigned char data[6];
+    lib_i2c_readdata( MC3210_ADDRESS, 0x0D, (unsigned char *)&data, 6);
+    // convert readings to fixedpointnum (in g's)
+    // Sensor output is 14 bit signed, sign extended to 16 bit, full scale +/- 8g
+    // So we have 13 bit fractional part, need to shift that to FIXEDPOINTSHIFT and
+    // take 8g into account (further shift by 3 bits).
+    // This only works if FIXEDPOINTSHIFT >= 10
+    ACC_ORIENTATION(global.acc_g_vector,
+    	((fixedpointnum)((int16_t)((data[1] << 8) | data[0]))) << (FIXEDPOINTSHIFT - 13 + 3),
+    	((fixedpointnum)((int16_t)((data[3] << 8) | data[2]))) << (FIXEDPOINTSHIFT - 13 + 3),
+    	((fixedpointnum)((int16_t)((data[5] << 8) | data[4]))) << (FIXEDPOINTSHIFT - 13 + 3));
+}
+
+#elif (ACCELEROMETER_TYPE==BMA180)
 
 #if !defined(BMA180_ADDRESS)
 #define BMA180_ADDRESS 0x40

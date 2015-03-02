@@ -7,6 +7,8 @@
 #include "lib_i2c.h"
 #include "lib_spi.h"
 
+#include "config.h"
+#include "defs.h"
 
 #define FLASH_PAGE_SIZE                 ((uint16_t)0x200)
 #define FLASH_WRITE_ADDR                (16*1024 - FLASH_PAGE_SIZE)  // use the last 0.5 KB for storage
@@ -50,15 +52,19 @@ void lib_hal_init(void)
     FMC_Close();
 
     // Init UART clock
+#if (MULTIWII_CONFIG_SERIAL_PORTS != NOSERIALPORT)
     uartInit();
+#endif
 
     // Init PWM clock and hardware
     drv_pwm_config_t pwm;
     pwmInit(&pwm);
 
     lib_i2c_init();
+#if (RX_TYPE==RX_SPI_PROTOCOL)
     lib_spi_init();
-
+#endif
+    
     SYS_LockReg();
 }
 
@@ -169,3 +175,34 @@ static int set_data_flash_base(uint32_t u32DFBA)
     // This is to pacify compiler - it never reaches this point
     return 0;
 }
+
+#ifdef DEBUG_ENABLE_SEMIHOST
+// Cribbed from Nuvoton's startup
+__attribute__( ( naked ) )
+void HardFault_Handler(void) 
+{
+    asm(	".syntax unified\n"
+            ".thumb_func\n"
+            "mov    r0, lr\n"
+            "lsls   r0, #29\n"          // check bit 2 for PSP stack
+            "bmi    SP_IS_PSP\n"        // PSP stack
+            "mrs    r0, msp\n"          // MSP stack, read MSP
+            "b      SP_READ_READY\n"
+            "SP_IS_PSP:\n"
+            "mrs    r0, psp\n"          // read PSP
+            "SP_READ_READY:\n"
+            "ldr    r1, [r0, #24]\n"    // get PC of previous instruction
+            "ldrh   r3, [r1]\n"         // get prev instruction off stack
+            "ldr    r2, BKPTINST\n"     // load bkpt instruction 
+            "cmp    r3, r2\n"           // is this the semihosting bkpt?
+            "bne    TAKE_HARDFAULT\n"   // no, hard fault is legit
+            "adds   r1, #4\n"           // skip 1 instruction past BKPT
+            "str    r1, [r0, #24]\n"    // save previous PC
+            "bx     lr\n"               // continue at PC
+            "TAKE_HARDFAULT:\n"
+            "b      .\n"                // hang on a real fault!
+            ".align\n"
+            "BKPTINST: .word 0xBEAB\n"  // magic semihosting bkpt instruction
+            );
+}
+#endif

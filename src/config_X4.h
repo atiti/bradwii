@@ -1,5 +1,5 @@
 /* 
-Copyright 2013 Brad Quick
+Copyright 2013-2014 Goebish, Brad Quick
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -34,8 +34,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //#define CONTROL_BOARD_TYPE CONTROL_BOARD_WITESPY_FLIP
 //#define CONTROL_BOARD_TYPE CONTROL_BOARD_WITESPY_MULTIWII_PRO_2
 //#define CONTROL_BOARD_TYPE CONTROL_BOARD_WITESPY_MULTIWII_PRO_2_GPS
-#define CONTROL_BOARD_TYPE CONTROL_BOARD_WLT_V202
+//#define CONTROL_BOARD_TYPE CONTROL_BOARD_WLT_V202
 //#define CONTROL_BOARD_TYPE CONTROL_BOARD_JXD_JD385
+//#define CONTROL_BOARD_TYPE CONTROL_BOARD_HUBSAN_H107L
+#define CONTROL_BOARD_TYPE CONTROL_BOARD_HUBSAN_Q4
 
 // Choose the type of r/c reciever that will be used
 //#define RX_TYPE RX_NORMAL
@@ -43,7 +45,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //#define RX_TYPE RX_DSM2_1024
 //#define RX_TYPE RX_DSM2_2048
 //#define RX_DSM2_SERIAL_PORT 1
-#define RX_TYPE RX_SPI_PROTOCOL
+//#define RX_TYPE RX_SPI_PROTOCOL
+#define RX_TYPE RX_SOFT_3_WIRE_SPI_PROTOCOL
 
 // Choose a channel order if you don't like the default for your receiver type selected above
 //#define RX_CHANNEL_ORDER         THROTTLEINDEX,ROLLINDEX,PITCHINDEX,YAWINDEX,AUX1INDEX,AUX2INDEX,AUX3INDEX,AUX4INDEX,8,9,10,11 //For Graupner/Spektrum
@@ -54,24 +57,32 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // uncomment to set the number of RX channels, otherwise it will default to what the control board/receiver can handle
 //#define RXNUMCHANNELS 8
 
-// uncomment to allow arming and disarming with the sticks:
-// Arming and disarming only happen at low throttle
-// Uncomment the following two lines to allow arming using yaw
+// arm/disarm Q4 with pitch high/low, or yaw high/low on X4.  Q4
+// TX has a narrow range on the horizontal stick axes, using pitch
+// helps
+
+#if CONTROL_BOARD_TYPE == CONTROL_BOARD_HUBSAN_Q4 
+#define STICK_ARM STICK_COMMAND_PITCH_HIGH
+#define STICK_DISARM STICK_COMMAND_PITCH_LOW
+
+#elif CONTROL_BOARD_TYPE == CONTROL_BOARD_HUBSAN_H107L
 #define STICK_ARM STICK_COMMAND_YAW_HIGH
 #define STICK_DISARM STICK_COMMAND_YAW_LOW
+#endif
 
 // uncomment the following two lines to allow arming using yaw, roll, and pitch all at once
 //#define STICK_ARM STICK_COMMAND_YAW_HIGH+STICK_COMMAND_ROLL_HIGH+STICK_COMMAND_PITCH_LOW
 //#define STICK_DISARM STICK_COMMAND_YAW_LOW+STICK_COMMAND_ROLL_LOW+STICK_COMMAND_PITCH_LOW
 
 // Choose an aircraft configuration (defaults to QUADX)
-//#define AIRCRAFT_CONFIGURATION QUADX
+#define AIRCRAFT_CONFIGURATION QUADX
 
 // Choose which serial ports will be used to transfer data to a configuration device.
 // Multiple serial channels can be configured. (i.e. one for computer, one for bluetooth).
 // Be sure to uncomment and set the baud rate for any enabled serial ports.
 // note: two examples are given below, but any combination of ports can be added together.
 
+//#define MULTIWII_CONFIG_SERIAL_PORTS NOSERIALPORT
 //#define MULTIWII_CONFIG_SERIAL_PORTS NOSERIALPORT
 //#define MULTIWII_CONFIG_SERIAL_PORTS SERIALPORT1
 //#define MULTIWII_CONFIG_SERIAL_PORTS SERIALPORT1+SERIALPORT3
@@ -95,7 +106,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define LEVEL_MODE_MAX_TILT 55  // 55 degrees
 #define LEVEL_MODE_MAX_TILT_HIGH_ANGLE 80       // 80 degrees when high angle checkbox active
 
-// Choose maximum tilt angles owhile navigating. This will determine how fast it moves from point to point.
+// Choose maximum tilt angles while navigating. This will determine how fast it moves from point to point.
 #define NAVIGATION_MAX_TILT 8   //15 degrees
 
 // Choose output ranges (in microseconds)
@@ -120,8 +131,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define AUX_MID_RANGE_HIGH 1700
 
 // Define low and high values for stick commands
-#define STICK_RANGE_LOW 1170
-#define STICK_RANGE_HIGH 1830
+#if CONTROL_BOARD_TYPE == CONTROL_BOARD_HUBSAN_Q4
+#define STICK_RANGE_LOW 1150
+#define STICK_RANGE_HIGH 1700
+#elif CONTROL_BOARD_TYPE == CONTROL_BOARD_HUBSAN_H107L
+#define STICK_RANGE_LOW 1150
+#define STICK_RANGE_HIGH 1850
+#endif
 
 // un-comment if you don't want to include code for a compass, otherwise it will default to what the control board has on it
 #define COMPASS_TYPE NO_COMPASS
@@ -163,7 +179,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // The first step is to isolate the control board from the frame of the aircraft (google Sorbothane).  If all else fails,
 // increase the GYRO_LOW_PASS_FILTER from 0 through 10.  The lowest value that works correctly is the one you should use.
 // Leave comment to use the default value.
-#define GYRO_LOW_PASS_FILTER 4
+#define GYRO_LOW_PASS_FILTER 3 // 3 = 42Hz (mpu3050)
 
 #define UNCRAHSABLE_MAX_ALTITUDE_OFFSET 30.0    // 30 meters above where uncrashability was enabled
 #define UNCRAHSABLE_RADIUS 50.0 // 50 meter radius
@@ -176,18 +192,151 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //#define GAIN_SCHEDULING_FACTOR 1.0
 
 // Uncomment if using DC motors
-//#define DC_MOTORS
+#define DC_MOTORS
 
-// Parameters for leds_set()
-// LED Outputs
+// #define BATTERY_ADC_CHANNEL NO_ADC
+#if CONTROL_BOARD_TYPE == CONTROL_BOARD_HUBSAN_Q4
+#define BATTERY_ADC_CHANNEL (1<<4)
+#elif CONTROL_BOARD_TYPE == CONTROL_BOARD_HUBSAN_H107L
+#define BATTERY_ADC_CHANNEL (1<<5)
+#endif
+
+// ADC external reference voltage.
+// In the MINI54 the ADC reference voltage is internally tied to
+// supply voltage. Supply voltage is generated by LM6206 3.0V
+// low dropout linear voltage regulator with +/- 2% output tolerance.
+// Problem: even this low dropout type has max. 680mV dropout
+// voltage. So even at a battery voltage of 3.6V the reference
+// voltage might be lower than this and then we can't measure
+// battery voltage anymore. So we have to use the internal
+// bandgap reference as well.
+// Unit: Volt
+#define ADC_REF_VOLTAGE 3.0
+
+// Internal bandgap reference voltage which can be measured
+// on channel 7. Unfortunately this has high tolerance:
+// Min 1.27V, max 1.44V. At least it should be independent of
+// supply voltage.
+// We don't use this constant and measure the real value instead
+// when we know that external reference voltage is OK.
+// Unit: Volt
+//#define ADC_BG_VOLTAGE 1.35
+
+
+// This factor converts ADC voltage to battery voltage.
+// Inverse of voltage divider for battery voltage measurement.
+// On this board the voltage divider consists of two 10kOhm resistors.
+#define BATTERY_VOLTAGE_FACTOR 2.0
+
+// If battery voltage is below this value,
+// the pilot will be warned by blinking the LEDs.
+// Battery voltage is measured under load and low pass filtered.
+// A test showed that using a limit value of 3.2V the battery
+// had a no-load voltage of 3.7V after landing.
+// If your setup has less voltage drop or you want to be notified earlier,
+// set this value higher.
+// Unit: Volt
+#define BATTERY_UNDERVOLTAGE_LIMIT 3.2
+
+// If battery voltage is below BATTTERY_UNDERVOLTAGE_LIMIT for a defined amount of time
+// enables the battery low indicator all the time until battery is replaced
+// 
+#define BATTERY_LOW_TIMER 1000 
+
+// Use of LEDs
 #define LED1 LED1_STATE			//0x01
-// #define LED2 LED2_STATE 		//0x02
-// #define LED3 LED3_STATE 	//0x04
-// #define LED4 LED4_STATE	//0x08
-// #define LED5 LED5_STATE	//0x10
-// #define LED6 LED6_STATE	//0x20
+#define LED2 LED2_STATE 		//0x02
+#define LED3 LED3_STATE 	//0x04
+#define LED4 LED4_STATE	//0x08
+#define LED5 LED5_STATE	//0x10
+#define LED6 LED6_STATE	//0x20
 // #define LED7 LED7_STATE  //0x40
 // #define LED8 LED8_STATE	//0x80
 
 // If LEDS shall indicate GPS link status
 // #define LED_GPS
+
+// Default Config MultiWii
+// set default acro mode rotation rates
+#define USERSETTINGS_MAXYAWRATE  600L << FIXEDPOINTSHIFT  					// degrees per second
+#define USERSETTINGS_MAXPITCHANDROLLRATE  400L << FIXEDPOINTSHIFT 	// degrees per second
+
+// set default PID settings
+#if CONTROL_BOARD_TYPE == CONTROL_BOARD_HUBSAN_Q4
+// pitch PIDs
+#define USERSETTINGS_PID_PGAIN_PITCHINDEX PID_TO_CONFIGURATORVALUE_P(3.5)
+#define USERSETTINGS_PID_IGAIN_PITCHINDEX PID_TO_CONFIGURATORVALUE_I(0.004)
+#define USERSETTINGS_PID_DGAIN_PITCHINDEX PID_TO_CONFIGURATORVALUE_D(22.0)
+ 
+// roll PIDs
+#define USERSETTINGS_PID_PGAIN_ROLLINDEX PID_TO_CONFIGURATORVALUE_P(3.5)
+#define USERSETTINGS_PID_IGAIN_ROLLINDEX PID_TO_CONFIGURATORVALUE_I(0.004)
+#define USERSETTINGS_PID_DGAIN_ROLLINDEX PID_TO_CONFIGURATORVALUE_D(22.0)
+
+// yaw PIDs
+#define USERSETTINGS_PID_PGAIN_YAWINDEX PID_TO_CONFIGURATORVALUE_P(10.0)
+#define USERSETTINGS_PID_IGAIN_YAWINDEX PID_TO_CONFIGURATORVALUE_I(0.000)
+#define USERSETTINGS_PID_DGAIN_YAWINDEX PID_TO_CONFIGURATORVALUE_D(22.0)
+
+//
+#define USERSETTINGS_PID_PGAIN_ALTITUDEINDEX 27L << 7;   						// 2.7 on configurator
+#define USERSETTINGS_PID_DGAIN_ALTITUDEINDEX 6L << 9;    						// 6 on configurator
+#define USERSETTINGS_PID_PGAIN_NAVIGATIONINDEX 25L << 11;   				// 2.5 on configurator
+#define USERSETTINGS_PID_DGAIN_NAVIGATIONINDEX 188L << 8;   				// .188 on configurator
+#elif CONTROL_BOARD_TYPE == CONTROL_BOARD_HUBSAN_H107L
+
+// pitch PIDs
+#define USERSETTINGS_PID_PGAIN_PITCHINDEX PID_TO_CONFIGURATORVALUE_P(3.5)
+#define USERSETTINGS_PID_IGAIN_PITCHINDEX PID_TO_CONFIGURATORVALUE_I(0.004)
+#define USERSETTINGS_PID_DGAIN_PITCHINDEX PID_TO_CONFIGURATORVALUE_D(22.0)
+ 
+// roll PIDs
+#define USERSETTINGS_PID_PGAIN_ROLLINDEX PID_TO_CONFIGURATORVALUE_P(3.5)
+#define USERSETTINGS_PID_IGAIN_ROLLINDEX PID_TO_CONFIGURATORVALUE_I(0.004)
+#define USERSETTINGS_PID_DGAIN_ROLLINDEX PID_TO_CONFIGURATORVALUE_D(22.0)
+
+// yaw PIDs
+#define USERSETTINGS_PID_PGAIN_YAWINDEX PID_TO_CONFIGURATORVALUE_P(10.0)
+#define USERSETTINGS_PID_IGAIN_YAWINDEX PID_TO_CONFIGURATORVALUE_I(0.000)
+#define USERSETTINGS_PID_DGAIN_YAWINDEX PID_TO_CONFIGURATORVALUE_D(22.0)
+
+//
+#define USERSETTINGS_PID_PGAIN_ALTITUDEINDEX 27L << 7;   						// 2.7 on configurator
+#define USERSETTINGS_PID_DGAIN_ALTITUDEINDEX 6L << 9;    						// 6 on configurator
+#define USERSETTINGS_PID_PGAIN_NAVIGATIONINDEX 25L << 11;   				// 2.5 on configurator
+#define USERSETTINGS_PID_DGAIN_NAVIGATIONINDEX 188L << 8;   				// .188 on configurator
+#endif
+
+// Checkbox settings...
+#if CONTROL_BOARD_TYPE == CONTROL_BOARD_HUBSAN_Q4
+// #define USERSETTINGS_CHECKBOXARM CHECKBOXMASKAUX1HIGH
+// #define USERSETTINGS_CHECKBOXAUTOTHROTTLE
+// #define USERSETTINGS_CHECKBOXALTHOLD
+// #define USERSETTINGS_CHECKBOXCOMPASS
+// #define USERSETTINGS_CHECKBOXPOSITIONHOLD
+// #define USERSETTINGS_CHECKBOXRETURNTOHOME
+//#define USERSETTINGS_CHECKBOXSEMIACRO CHECKBOXMASKAUX1HIGH
+// #define USERSETTINGS_CHECKBOXFULLACRO
+//#define USERSETTINGS_CHECKBOXHIGHRATES CHECKBOXMASKAUX1HIGH
+//#define USERSETTINGS_CHECKBOXHIGHANGLE CHECKBOXMASKAUX1LOW
+#define USERSETTINGS_CHECKBOXAUTOTUNE CHECKBOXMASKAUX1LOW
+// #define USERSETTINGS_CHECKBOXUNCRASHABLE
+// #define USERSETTINGS_CHECKBOXHEADFREE
+// #define USERSETTINGS_CHECKBOXYAWHOLD
+
+#elif CONTROL_BOARD_TYPE == CONTROL_BOARD_HUBSAN_H107L
+// #define USERSETTINGS_CHECKBOXARM CHECKBOXMASKAUX1HIGH
+// #define USERSETTINGS_CHECKBOXAUTOTHROTTLE
+// #define USERSETTINGS_CHECKBOXALTHOLD
+// #define USERSETTINGS_CHECKBOXCOMPASS
+// #define USERSETTINGS_CHECKBOXPOSITIONHOLD
+// #define USERSETTINGS_CHECKBOXRETURNTOHOME
+#define USERSETTINGS_CHECKBOXSEMIACRO CHECKBOXMASKAUX1HIGH
+// #define USERSETTINGS_CHECKBOXFULLACRO
+#define USERSETTINGS_CHECKBOXHIGHRATES CHECKBOXMASKAUX1HIGH
+#define USERSETTINGS_CHECKBOXHIGHANGLE CHECKBOXMASKAUX1LOW
+#define USERSETTINGS_CHECKBOXAUTOTUNE CHECKBOXMASKAUX2HIGH
+// #define USERSETTINGS_CHECKBOXUNCRASHABLE
+// #define USERSETTINGS_CHECKBOXHEADFREE
+// #define USERSETTINGS_CHECKBOXYAWHOLD
+#endif

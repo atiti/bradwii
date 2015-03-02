@@ -25,18 +25,27 @@ extern globalstruct global;
 
 void writeusersettingstoeeprom(void)
 {
+#if (EEPROM_SIZE != NO_EEPROM)
+	
     uint16_t magicnumber = MAGICNUMBER;
     int16_t size = sizeof(usersettingsstruct);
     uint16_t index = 0;
+	
+		// if usersettings larger den defined eeprom size, leave funktion.	
+		if(size > EEPROM_SIZE) 
+				return;
 
     index += eeprom_write_block((const void *)&magicnumber, index, sizeof(magicnumber));
     index += eeprom_write_block((const void *)&size, index, sizeof(size));
     index += eeprom_write_block((const void *)&usersettings, index, size);
-    eeprom_commit();
+    eeprom_commit(); //Why? It's a emtpy function in drv_hal.c!
+#endif
 }
 
 void readusersettingsfromeeprom(void)
 {
+#if (EEPROM_SIZE != NO_EEPROM)
+
     uint16_t magicnumber = 0;
     int16_t size = 0;
     uint16_t index = 0;
@@ -49,7 +58,10 @@ void readusersettingsfromeeprom(void)
     if (size > sizeof(usersettingsstruct))
         size = sizeof(usersettingsstruct);
 
+		if(size > EEPROM_SIZE) 
+				return;
+		
     eeprom_read_block((void *) &usersettings, index, size);
-
     global.usersettingsfromeeprom = 1;  // set a flag so the rest of the program know it's working with calibtated settings
+#endif
 }

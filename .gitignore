@@ -6,3 +6,7 @@ obj-Mini51/
 *.bak
 *.map
 *.lst
+/Debug
+.settings/
+
+us.stackdump

@@ -32,6 +32,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define CONTROL_BOARD_WITESPY_MULTIWII_PRO_2_GPS 10
 #define CONTROL_BOARD_WLT_V202 100
 #define CONTROL_BOARD_JXD_JD385 101
+#define CONTROL_BOARD_HUBSAN_H107L 102
+#define CONTROL_BOARD_HUBSAN_Q4 103
 
 // MICROCONTROLLER_TYPE's
 #define MEGA2560 0
@@ -61,10 +63,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // GYRO_TYPE's
 #define ITG3200 1
 #define MPU6050 2
+#define MPU3050 3
 
 // ACCELEROMETER_TYPE's
 #define BMA180 1
 #define MPU6050 2
+#define MC3210 3
+
+//DEFINE ADCs:
+#define NO_ADC 0
 
 // GPS_TYPE's
 #define NO_GPS 0
@@ -98,6 +105,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define RX_DSM2_2048 2
 #define RX_CPPM 3
 #define RX_SPI_PROTOCOL 100
+#define RX_SOFT_3_WIRE_PROTOCOL 101
 
 // Stick Command stick positions
 #define STICK_COMMAND_ROLL_LOW (1<<0)
@@ -110,3 +118,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // general yes/no (used for MOTOR_STOP)
 #define YES 1
 #define NO 0
+
+// EEPROM
+#define NO_EEPROM 0

@@ -127,7 +127,7 @@ SP_is_PSP
 SP_Read_Ready
                 LDR     R1, [R0, #24]         ; Get previous PC
                 LDRH    R3, [R1]              ; Get instruction
-                LDR    R2, =0xBEAB           ; The sepcial BKPT instruction
+                LDR     R2, =0xBEAB           ; The sepcial BKPT instruction
                 CMP     R3, R2                ; Test if the instruction at previous PC is BKPT
                 BNE    HardFault_Handler_Ret ; Not BKPT
         

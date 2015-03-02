@@ -18,13 +18,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "checkboxes.h"
 #include "bradwii.h"
 #include "rx.h"
+#include "lib_timers.h"
+#include "config.h"
 
 extern globalstruct global;
 extern usersettingsstruct usersettings;
 
+#ifndef X4_BUILD
 char checkboxnames[] /* PROGMEM */  =   // names for dynamic generation of config GUI
     // this could be moved to program memory if we wanted to save a few bytes of space.
-    "Arm;" "Thr. Helper;" "Alt. Hold;" "Mag. Hold;" "Pos. Hold;" "Ret. Home;" "Semi Acro;" "Full Acro;" "High Rates;" "High Angle;" "Auto Tune;" "Uncrashable;" "Headfree;";
+    "Arm;" "Thr. Helper;" "Alt. Hold;" "Mag. Hold;" "Pos. Hold;" "Ret. Home;" "Semi Acro;" "Full Acro;" "High Rates;" "High Angle;" "Auto Tune;" "Uncrashable;" "Headfree;" "Yaw Hold;" "LED1;" "LED2;";
+#endif
 
 // each checkbox item has a checkboxvalue.  The bits in this value represent low, medium, and high checkboxes
 // for each of the aux switches, just as they show up in most config programs.
@@ -78,6 +82,9 @@ void checkcheckboxitems(void)
 #if (defined(STICK_ARM) | defined (STICK_DISARM))
     // figure out where the sticks are
     unsigned int stickmask = 0;
+		static uint32_t stickCounterArm = 0;
+		static uint32_t stickCounterDisArm = 0;
+		
     if (global.rxvalues[ROLLINDEX] < FPSTICKLOW)
         stickmask |= STICK_COMMAND_ROLL_LOW;
     else if (global.rxvalues[ROLLINDEX] > FPSTICKHIGH)
@@ -98,11 +105,25 @@ void checkcheckboxitems(void)
     // Start with the previous value in case the sticks aren't doing anything special
     global.activecheckboxitems = (global.activecheckboxitems & ~CHECKBOXMASKARM) |(global.previousactivecheckboxitems & CHECKBOXMASKARM);
 
-    if ((stickmask & (STICK_ARM)) == STICK_ARM)
-        global.activecheckboxitems |= CHECKBOXMASKARM;
-
-    else if ((stickmask & (STICK_DISARM)) == STICK_DISARM)
-        global.activecheckboxitems &= ~CHECKBOXMASKARM;
+    if ((stickmask & (STICK_ARM)) == STICK_ARM) {
+			if (stickCounterArm == 0)
+				stickCounterArm = lib_timers_starttimer();
+			
+			if (lib_timers_gettimermicroseconds(stickCounterArm) > STICK_ARM_TIME * 1000)
+				global.activecheckboxitems |= CHECKBOXMASKARM;
+		} 
+    else if ((stickmask & (STICK_DISARM)) == STICK_DISARM) {
+			if (stickCounterDisArm == 0)
+				stickCounterDisArm = lib_timers_starttimer();
+			
+		if (lib_timers_gettimermicroseconds(stickCounterDisArm) > STICK_ARM_TIME * 1000)
+			global.activecheckboxitems &= ~CHECKBOXMASKARM;
+		} 
+		else
+		{
+			stickCounterArm = 0;
+			stickCounterDisArm = 0;
+		}
 
 #endif
 }

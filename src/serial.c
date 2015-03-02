@@ -168,7 +168,7 @@ void evaluatecommand(char portnumber, unsigned char *data)
         sendgoodheader(portnumber, 0);
     } else if (command == MSP_ACC_CALIBRATION) {        // send attitude data
         if (!global.armed)
-            calibrategyroandaccelerometer();
+            calibrategyroandaccelerometer(true);
         sendgoodheader(portnumber, 0);
     }
 
@@ -203,13 +203,15 @@ void evaluatecommand(char portnumber, unsigned char *data)
     } else if (command == MSP_PID) {    // send pid data
         sendgoodheader(portnumber, 3 * NUMPIDITEMS);
         for (int x = 0; x < NUMPIDITEMS; ++x) {
-            if (x == ALTITUDEINDEX)
+						if (x == ALTITUDEINDEX)
                 sendandchecksumcharacter(portnumber, usersettings.pid_pgain[x] >> 7);
             else if (x == NAVIGATIONINDEX)
                 sendandchecksumcharacter(portnumber, usersettings.pid_pgain[x] >> 11);
             else
                 sendandchecksumcharacter(portnumber, usersettings.pid_pgain[x] >> 3);
-            sendandchecksumcharacter(portnumber, usersettings.pid_igain[x]);
+            
+						sendandchecksumcharacter(portnumber, usersettings.pid_igain[x]);
+						
             if (x == NAVIGATIONINDEX)
                 sendandchecksumcharacter(portnumber, usersettings.pid_dgain[x] >> 8);
             else if (x == ALTITUDEINDEX)
@@ -219,25 +221,23 @@ void evaluatecommand(char portnumber, unsigned char *data)
         }
     } else if (command == MSP_SET_PID) {
         for (int x = 0; x < NUMPIDITEMS; ++x) {
-            if (x == ALTITUDEINDEX)
+						if (x == ALTITUDEINDEX)
                 usersettings.pid_pgain[x] = ((fixedpointnum) (*data++)) << 7;
             else if (x == NAVIGATIONINDEX)
                 usersettings.pid_pgain[x] = ((fixedpointnum) (*data++)) << 11;
             else
                 usersettings.pid_pgain[x] = ((fixedpointnum) (*data++)) << 3;
-            usersettings.pid_igain[x] = ((fixedpointnum) (*data++));
-            if (x == NAVIGATIONINDEX)
+            
+						usersettings.pid_igain[x] = ((fixedpointnum) (*data++));
+            
+						if (x == NAVIGATIONINDEX)
                 usersettings.pid_dgain[x] = ((fixedpointnum) (*data++)) << 8;
             else if (x == ALTITUDEINDEX)
                 usersettings.pid_dgain[x] = ((fixedpointnum) (*data++)) << 9;
             else
                 usersettings.pid_dgain[x] = ((fixedpointnum) (*data++)) << 2;
-
         }
-// while testing, make roll pid equal to pitch pid so I only have to change one thing.
-//usersettings.pid_pgain[ROLLINDEX]=usersettings.pid_pgain[PITCHINDEX];
-//usersettings.pid_igain[ROLLINDEX]=usersettings.pid_igain[PITCHINDEX];
-//usersettings.pid_dgain[ROLLINDEX]=usersettings.pid_dgain[PITCHINDEX];
+
         sendgoodheader(portnumber, 0);
     } else if (command == MSP_DEBUG) {  // send debug data
         sendgoodheader(portnumber, 8);
@@ -295,9 +295,16 @@ void evaluatecommand(char portnumber, unsigned char *data)
         data++;                 // thrMid8
         data++;                 // thrExpo8
         sendgoodheader(portnumber, 0);
-    }
-
-    else                        // we don't know this command
+    
+#if (BATTERY_ADC_CHANNEL != NO_ADC)
+    } else if (command == MSP_BAT) { // Send Battery Voltage
+			sendgoodheader(portnumber, 1);
+		#warning "Fixed value for testing!"	
+		sendandchecksumcharacter(portnumber, 40);	
+		// sendandchecksumcharacter(portnumber, global.batteryvoltage);
+#endif
+		}
+			else                        // we don't know this command
     {
         senderrorheader(portnumber);
     }
@@ -363,42 +370,6 @@ void serialcheckportforaction(char portnumber)
 
 //#define SERIALTEXTDEBUG
 #ifdef SERIALTEXTDEBUG
-void serialprintnumber(char portnumber, long num, int digits, int decimals, char usebuffer)
-   // prints a int number, right justified, using digits # of digits, puting a
-   // decimal decimals places from the end, and using blank
-   // to fill all blank spaces
-{
-    char stg[12];
-    char *ptr;
-    int x;
-
-    ptr = stg + 11;
-
-    *ptr = '\0';
-    if (num < 0) {
-        num = -num;
-        *(--ptr) = '-';
-    } else
-        *(--ptr) = ' ';
-
-    for (x = 1; x <= digits; ++x) {
-        if (num == 0)
-            *(--ptr) = ' ';
-        else {
-            *(--ptr) = 48 + num - (num / 10) * 10;
-            num /= 10;
-        }
-        if (x == decimals)
-            *(--ptr) = '.';
-    }
-    lib_serial_sendstring(portnumber, ptr);
-}
-
-void serialprintfixedpoint(char portnumber, fixedpointnum fp)
-{
-    serialprintnumber(portnumber, lib_fp_multiply(fp, 1000), 7, 3, 1);
-    lib_serial_sendstring(portnumber, "\n\r");
-}
 
 void serialcheckportforactiontest(char portnumber)
 {
@@ -444,6 +415,52 @@ void serialcheckportforactiontest(char portnumber)
     }
 }
 #endif
+#endif
+
+#if (MULTIWII_CONFIG_SERIAL_PORTS!=NOSERIALPORT) || defined(DEBUGPORT)
+
+void serialprintnumber(char portnumber, long num, int digits, int decimals, char usebuffer)
+   // prints a int number, right justified, using digits # of digits, puting a
+   // decimal decimals places from the end, and using blank
+   // to fill all blank spaces
+{
+    char stg[12];
+    char *ptr;
+    int x;
+
+    ptr = stg + 11;
+
+    *ptr = '\0';
+    if (num < 0) {
+        num = -num;
+        *(--ptr) = '-';
+    } else
+        *(--ptr) = ' ';
+
+    for (x = 1; x <= digits; ++x) {
+        if (num == 0)
+            *(--ptr) = ' ';
+        else {
+            *(--ptr) = 48 + num - (num / 10) * 10;
+            num /= 10;
+        }
+        if (x == decimals)
+            *(--ptr) = '.';
+    }
+    lib_serial_sendstring(portnumber, ptr);
+}
+
+void serialprintfixedpoint(char portnumber, fixedpointnum fp)
+{
+    serialprintnumber(portnumber, lib_fp_multiply(fp, 1000), 7, 3, 1);
+    lib_serial_sendstring(portnumber, "\n\r");
+}
+
+void serialprintfixedpoint_no_linebreak(char portnumber, fixedpointnum fp)
+{
+    serialprintnumber(portnumber, lib_fp_multiply(fp, 1000), 7, 3, 1);
+}
+
 #endif
 
 void serialcheckforaction(void)
