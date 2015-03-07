@@ -402,12 +402,16 @@ lib_serial_sendstring(DEBUGPORT, "\r\n");
         if (global.activecheckboxitems & CHECKBOXMASKAUTOTUNE) {
             if (!(global.previousactivecheckboxitems & CHECKBOXMASKAUTOTUNE)) {
                 autotune(angleerror, AUTOTUNESTARTING); // tell autotune that we just started autotuning
+#if defined(DEBUGPORT)
 			lib_serial_sendstring(DEBUGPORT, "AT START\n");
+#endif
 		}
             else
                 autotune(angleerror, AUTOTUNETUNING);   // tell autotune that we are in the middle of autotuning
         } else if (global.previousactivecheckboxitems & CHECKBOXMASKAUTOTUNE) {
+#if defined(DEBUGPORT)
 			lib_serial_sendstring(DEBUGPORT, "AT STOP\n");
+#endif
             autotune(angleerror, AUTOTUNESTOPPING);     // tell autotune that we just stopped autotuning
 	}
 #endif
@@ -778,19 +782,19 @@ void defaultusersettings(void)
 #ifdef USERSETTINGS_PID_PGAIN_ALTITUDEINDEX		
     usersettings.pid_pgain[ALTITUDEINDEX] = USERSETTINGS_PID_PGAIN_ALTITUDEINDEX;
 #else
-		usersettings.pid_pgain[ALTITUDEINDEX] = PID_TO_CONFIGURATORVALUE_ALT_P(2.7) // 2.7 on configurator
+		usersettings.pid_pgain[ALTITUDEINDEX] = PID_TO_CONFIGURATORVALUE_ALT_P(2.7); // 2.7 on configurator
 #endif
 		
 #ifdef USERSETTINGS_PID_DGAIN_ALTITUDEINDEX		
     usersettings.pid_dgain[ALTITUDEINDEX] = USERSETTINGS_PID_DGAIN_ALTITUDEINDEX;    		
 #else
-		usersettings.pid_dgain[ALTITUDEINDEX] = PID_TO_CONFIGURATORVALUE_ALT_D(6.0) // 6 on configurator
+		usersettings.pid_dgain[ALTITUDEINDEX] = PID_TO_CONFIGURATORVALUE_ALT_D(6.0); // 6 on configurator
 #endif
 
 #ifdef USERSETTINGS_PID_PGAIN_NAVIGATIONINDEX
     usersettings.pid_pgain[NAVIGATIONINDEX] = USERSETTINGS_PID_PGAIN_NAVIGATIONINDEX;   
 #else
-		usersettings.pid_pgain[NAVIGATIONINDEX] = PID_TO_CONFIGURATORVALUE_NAV_P(2.5) // 2.5 on configurator
+		usersettings.pid_pgain[NAVIGATIONINDEX] = PID_TO_CONFIGURATORVALUE_NAV_P(2.5); // 2.5 on configurator
 #endif
 		
 #ifdef USERSETTINGS_PID_DGAIN_NAVIGATIONINDEX	

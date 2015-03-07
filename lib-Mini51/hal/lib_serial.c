@@ -34,9 +34,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "projectsettings.h"
 #include "drv_serial.h"
 
+#if defined(DEBUG_ENABLE_SEMIHOST)
 // for semihosting
 static const int SYS_WRITEC = 0x03;
 static const int SYS_WRITE0 = 0x04;
+#endif
 
 static serialPort_t *lib_serial_getport(unsigned char serialportnumber)
 {
@@ -81,6 +83,7 @@ void lib_serial_initport(unsigned char serialportnumber, long baud)
 
 void lib_serial_sendchar(unsigned char serialportnumber, unsigned char c)
 {
+#if defined(DEBUG_ENABLE_SEMIHOST)
     if(serialportnumber == SEMIHOSTPORTNUMBER) {
     // add a character to the send buffer
 	    asm volatile ("mov r0, %0\n\t"
@@ -88,13 +91,17 @@ void lib_serial_sendchar(unsigned char serialportnumber, unsigned char c)
             "bkpt 0xAB \n\t"
 	    "nop \n\t" : :"I" (SYS_WRITEC), "l" ((int)&c): );
     } else {
+#endif
         serialPort_t *port = lib_serial_getport(serialportnumber);
         uartWrite(port, c);
+#if defined(DEBUG_ENABLE_SEMIHOST)
     }
+#endif
 }
    
 void lib_serial_sendstring(unsigned char serialportnumber, char *string)
 {
+#if defined(DEBUG_ENABLE_SEMIHOST)
     if(serialportnumber == SEMIHOSTPORTNUMBER) {
     // add a character to the send buffer
 	    asm volatile ("mov r0, %0\n\t"
@@ -102,10 +109,13 @@ void lib_serial_sendstring(unsigned char serialportnumber, char *string)
             "bkpt 0xAB\n\t" 
             "nop \n\t" : :"I" (SYS_WRITE0), "l" (string): );
     } else {
+#endif
     // adds the string to the output buffer.
     while (*string) 
         lib_serial_sendchar(serialportnumber, *string++);
+#if defined(DEBUG_ENABLE_SEMIHOST)
     }
+#endif
 }
 
 void lib_serial_senddata(unsigned char serialportnumber, unsigned char *data, int datalength)
@@ -117,14 +127,18 @@ void lib_serial_senddata(unsigned char serialportnumber, unsigned char *data, in
 
 int lib_serial_numcharsavailable(unsigned char serialportnumber)
 {
+#if defined(DEBUG_ENABLE_SEMIHOST)
     // semihosting debug TBD
     if(serialportnumber == SEMIHOSTPORTNUMBER) {
         return 0;
     } else {
+#endif
         // returns number of characters available in the rx buffer
         serialPort_t *port = lib_serial_getport(serialportnumber);
         return uartAvailable(port);
+#if defined(DEBUG_ENABLE_SEMIHOST)
     }
+#endif
 }
 
 unsigned char lib_serial_getchar(unsigned char serialportnumber)
