@@ -133,8 +133,9 @@ void initimu(void)
 	// Save in EEPROM
         writeusersettingstoeeprom();
 	}
-    else // only gyro
-        calibrategyroandaccelerometer(false);
+//For my X4, nothing special about the gyro.
+//    else // only gyro
+//        calibrategyroandaccelerometer(false);
 
     global.estimateddownvector[XINDEX] = 0;
     global.estimateddownvector[YINDEX] = 0;
