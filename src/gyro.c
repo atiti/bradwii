@@ -35,12 +35,19 @@ extern globalstruct global;
 #define MPU3050_DLPF_CFG   6
 #endif
 
+#if (GYRO_LOW_PASS_FILTER==0) //Full Range
+#define SAMPLE_RATE_DIVISOR  0x07 // 1000 Hz = 8000/(7 + 1)
+#else
+#define SAMPLE_RATE_DIVISOR 0x00 // 1000 Hz = 1000/(0 + 1)
+#endif
+
 void initgyro(void)
 {
     lib_i2c_writereg(MPU3050_ADDRESS, 0x3E, 0x80);  //PWR_MGMT_1 -- DEVICE_RESET 1
     lib_timers_delaymilliseconds(5);
     lib_i2c_writereg(MPU3050_ADDRESS, 0x3E, 0x03); //PWR_MGMT_1 -- SLEEP 0; CYCLE 0; TEMP_DIS 0; CLKSEL 3 (PLL with Z Gyro reference)
     lib_i2c_writereg(MPU3050_ADDRESS, 0x16, MPU3050_DLPF_CFG + 0x18); // Gyro CONFIG -- EXT_SYNC_SET 0 (disable input pin for data sync) ; default DLPF_CFG = 0 => GYRO bandwidth = 256Hz); -- FS_SEL = 3: Full scale set to 2000 deg/sec
+    lib_i2c_writereg(MPU3050_ADDRESS, 0x15, SAMPLE_RATE_DIVISOR);
 }
 
 void readgyro(void)
