@@ -28,6 +28,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "imu.h"
 #include "compass.h"
 #include "leds.h"
+#include "eeprom.h"
 
 extern globalstruct global;
 extern usersettingsstruct usersettings;
@@ -127,8 +128,11 @@ void calibrategyroandaccelerometer(bool both)
 void initimu(void)
 {
     // calibrate both sensors if we didn't load any data from eeprom
-    if (global.usersettingsfromeeprom == 0)
+    if (global.usersettingsfromeeprom == 0){
         calibrategyroandaccelerometer(true);
+	// Save in EEPROM
+        writeusersettingstoeeprom();
+	}
     else // only gyro
         calibrategyroandaccelerometer(false);
 
