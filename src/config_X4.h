@@ -167,6 +167,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // The first step is to isolate the control board from the frame of the aircraft (google Sorbothane).  If all else fails,
 // increase the GYRO_LOW_PASS_FILTER from 0 through 10.  The lowest value that works correctly is the one you should use.
 // Leave comment to use the default value.
+
+// 0x18 + GYRO_LOW_PASS_FILTER
+// 0x18 // 256 Hz Low pass filter, 8 kHz internal sample rate
+// 0x19 // 188 Hz Low pass filter, 1 kHz internal sample rate
+// 0x1A // 98 Hz Low pass filter, 1 kHz internal sample rate
+// 0x1B // 42 Hz Low pass filter, 1 kHz internal sample rate
+// 0x1C // 20 Hz Low pass filter, 1 kHz internal sample rate
+// 0x1D // 10 Hz Low pass filter, 1 kHz internal sample rate
+// 0x1E // 5 Hz Low pass filter, 1 kHz internal sample rate
+
 #define GYRO_LOW_PASS_FILTER 3 // 3 = 42Hz (mpu3050)
 
 #define UNCRAHSABLE_MAX_ALTITUDE_OFFSET 30.0    // 30 meters above where uncrashability was enabled
