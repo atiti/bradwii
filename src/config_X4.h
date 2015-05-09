@@ -179,6 +179,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #define GYRO_LOW_PASS_FILTER 3 // 3 = 42Hz (mpu3050)
 
+// 0x00 000: Low pass filter set to 512 Hz bandwidth
+// 0x10 001: Low pass filter set to 256 Hz bandwidth
+// 0x20 010: Low pass filter set to 128 Hz bandwidth
+// 0x30 011: Low pass filter set to 64 Hz bandwidth
+// 0x40 100: Low pass filter set to 32 Hz bandwidth
+// 0x50 101: Low pass filter set to 16 Hz bandwidth
+// 0x60 110: Low pass filter set to 8 Hz bandwidth
+
+#define ACC_LOW_PASS_FILTER 0x30  // 0x30 = 64 Hz (MC3210)
+
 #define UNCRAHSABLE_MAX_ALTITUDE_OFFSET 30.0    // 30 meters above where uncrashability was enabled
 #define UNCRAHSABLE_RADIUS 50.0 // 50 meter radius
 
