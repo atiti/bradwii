@@ -46,7 +46,7 @@ void initacc(void)
     // Select +/- 8g range, 14-bit resolution
     // Low-pass filter set to 64 Hz bandwidth
     // (GINT interrupt updates at LPF bandwidth setting)
-    lib_i2c_writereg( MC3210_ADDRESS, 0x20, 0xBF);
+    lib_i2c_writereg( MC3210_ADDRESS, 0x20, 0x8F + ACC_LOW_PASS_FILTER);
     // Mode register: wake mode
     lib_i2c_writereg( MC3210_ADDRESS, 0x07, 0x01);
 }
