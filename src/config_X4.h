@@ -105,6 +105,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // Un-comment and set to YES or NO to override the default value.
 // When YES, motors will stop when throttle stick is below STICK_RANGE_LOW (see below) and not in acro or semi acro mode.
 #define MOTORS_STOP YES
+//Motors stop in acro/semi acro
+#define MOTORS_STOP_ALWAYS
 
 // set the minimum motor output when armed. If not set, 1067 will be used as a default
 #define ARMED_MIN_MOTOR_OUTPUT 1025     // motors spin slowly when armed
