@@ -151,9 +151,8 @@ int main(void)
 		// Enables battery low indicator after the voltage droped under the specified limit for a amount of time
 		unsigned long batterylowtimer;
 		
-		// not working why?
-	  // static lib_adc_channel_t adc_bat_channel = (lib_adc_channel_t) BATTERY_ADC_CHANNEL;
-		// static lib_adc_channel_t adc_ref_channel = (lib_adc_channel_t) 8;
+		// this is a casting problem between enum/int?
+	  static lib_adc_channel_t adc_bat_channel = BATTERY_ADC_CHANNEL;
 #endif
 	
     static bool isfailsafeactive;     // true while we don't get new data from transmitter
@@ -250,8 +249,7 @@ lib_serial_sendstring(DEBUGPORT, "\r\n");
     bandgapvoltageraw = lib_adc_read_raw();
     // Start first battery voltage measurement
     isadcchannelref = false;
-    //lib_adc_select_channel(adc_bat_channel);
-		lib_adc_select_channel(BATTERY_ADC_CHANNEL);
+    lib_adc_select_channel(adc_bat_channel);
     lib_adc_startconv();
 		#if (BATTERY_ADC_DEBUG)
 		while(lib_adc_is_busy()){
@@ -618,8 +616,7 @@ lib_serial_sendstring(DEBUGPORT, "\r\n");
             if(isadcchannelref) {
                 bandgapvoltageraw = lib_adc_read_raw();
                 isadcchannelref = false;
-                //lib_adc_select_channel(adc_bat_channel);
-								lib_adc_select_channel(BATTERY_ADC_CHANNEL);
+                lib_adc_select_channel(adc_bat_channel);
             } else {
 								//raw voltage is 0.0-1.0 (min to max adc )
                 batteryvoltageraw = lib_adc_read_raw();
@@ -654,11 +651,7 @@ lib_serial_sendstring(DEBUGPORT, "\r\n");
 								
 							  // Start timer if battery is below limit
                 if(global.batteryvoltage < FP_BATTERY_UNDERVOLTAGE_LIMIT) {
-									// if(batterylowtimer == 0) batterylowtimer = lib_timers_starttimer();
-									batterylowtimer++;
-									
-									if(batterylowtimer > BATTERY_LOW_TIMER)
-										isbatterylow = true;
+									 if(batterylowtimer == 0) batterylowtimer = lib_timers_starttimer();
 								}
 								else // if bettery is above limit reset batterylowtimer
 								{
@@ -670,8 +663,7 @@ lib_serial_sendstring(DEBUGPORT, "\r\n");
             lib_adc_startconv();
         } // IF ADC result available			
 				
-				// it's not working, why? used upper "construction"
-				//if (lib_timers_gettimermicroseconds(batterylowtimer) > BATTERY_LOW_TIMER * 1000L) isbatterylow = true;
+				if (lib_timers_gettimermicroseconds(batterylowtimer) > BATTERY_LOW_TIMER * 1000L) isbatterylow = true;
 				
 
         // Decide what LEDs have to show
