@@ -663,7 +663,9 @@ lib_serial_sendstring(DEBUGPORT, "\r\n");
             lib_adc_startconv();
         } // IF ADC result available			
 				
-				if (lib_timers_gettimermicroseconds(batterylowtimer) > BATTERY_LOW_TIMER * 1000L) isbatterylow = true;
+			// Its working now. tested on hubsan.
+			if (!(lib_timers_gettimermicroseconds(batterylowtimer) > BATTERY_LOW_TIMER * 1000L)) isbatterylow = true;
+
 				
 
         // Decide what LEDs have to show
