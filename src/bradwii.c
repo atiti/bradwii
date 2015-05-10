@@ -590,7 +590,11 @@ lib_serial_sendstring(DEBUGPORT, "\r\n");
         // if we aren't armed, or if we desire to have the motors stop, 
         if (!global.armed
 #if (MOTORS_STOP==YES)
-            || (global.rxvalues[THROTTLEINDEX] < FPSTICKLOW && !(global.activecheckboxitems & (CHECKBOXMASKFULLACRO | CHECKBOXMASKSEMIACRO)))
+            || (global.rxvalues[THROTTLEINDEX] < FPSTICKLOW 
+		#ifndef MOTORS_STOP_ALWAYS
+		&& !(global.activecheckboxitems & (CHECKBOXMASKFULLACRO | CHECKBOXMASKSEMIACRO))
+		#endif				
+		)
 #endif
             )
             setallmotoroutputs(MIN_MOTOR_OUTPUT);
