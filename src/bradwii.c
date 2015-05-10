@@ -679,15 +679,20 @@ lib_serial_sendstring(DEBUGPORT, "\r\n");
 #endif 
 				
 #if (BATTERY_ADC_CHANNEL != NO_ADC)				
-				else if(isfailsafeactive) {
+	else if(isfailsafeactive) {
 #else
-				if(isfailsafeactive) {
+	if(isfailsafeactive) {
 #endif					
             // Lost contact with TX
             // Blink LEDs fast alternating
-						leds_blink_continuous(LED_ALL, 125, 125);
-						//lib_serial_sendstring(DEBUGPORT, "isfailsafeactive true\r\n");
+	    leds_blink_continuous(LED_ALL, 125, 125);
+	    //lib_serial_sendstring(DEBUGPORT, "isfailsafeactive true\r\n");
         }
+#ifdef USERSETTINGS_CHECKBOXLEDTOGGLE
+	else if(global.activecheckboxitems & CHECKBOXMASKLEDTOGGLE)  { 
+  	    leds_set(LED_NONE);
+	}
+#endif	
         else if(!global.armed) {
 					  //lib_serial_sendstring(DEBUGPORT, "isfailsafeactive false\r\n");
 
@@ -851,7 +856,9 @@ void defaultusersettings(void)
 #ifdef USERSETTINGS_CHECKBOXYAWHOLD
 	  usersettings.checkboxconfiguration[CHECKBOXYAWHOLD] = USERSETTINGS_CHECKBOXYAWHOLD;	
 #endif
-
+#ifdef USERSETTINGS_CHECKBOXLEDTOGGLE
+	  usersettings.checkboxconfiguration[CHECKBOXLEDTOGGLE] = USERSETTINGS_CHECKBOXLEDTOGGLE;	
+#endif
 	// reset the calibration settings
     for (int x = 0; x < 3; ++x) {
         usersettings.compasszerooffset[x] = 0;
