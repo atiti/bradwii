@@ -179,7 +179,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // 0x1D // 10 Hz Low pass filter, 1 kHz internal sample rate
 // 0x1E // 5 Hz Low pass filter, 1 kHz internal sample rate
 
-#define GYRO_LOW_PASS_FILTER 3 // 3 = 42Hz (mpu3050)
+#define GYRO_LOW_PASS_FILTER 2 // 3 = 42Hz (mpu3050)
 
 // 0x00 000: Low pass filter set to 512 Hz bandwidth
 // 0x10 001: Low pass filter set to 256 Hz bandwidth
