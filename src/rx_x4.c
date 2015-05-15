@@ -248,7 +248,7 @@ void readrx(void) // todo : telemetry
 {
     if( lib_timers_gettimermicroseconds(timeout_timer) > 14000) {
         timeout_timer = lib_timers_starttimer();
-        A7105_Strobe(A7105_RX);
+        //A7105_Strobe(A7105_RX);
     }
     if(A7105_ReadRegister(A7105_00_MODE) & A7105_MODE_TRER_MASK)
         return; // nothing received
