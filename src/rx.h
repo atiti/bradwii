@@ -22,6 +22,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 void initrx(void);
 void readrx(void);
 
+#if defined(X4_BUILD)
+void bind(void);
+void init_a7105(void);
+#endif
+
 #define THROTTLE_RX_TIMER FIRSTRXTIMER
 #define ROLL_RX_TIMER FIRSTRXTIMER+1
 #define PITCH_RX_TIMER FIRSTRXTIMER+2
