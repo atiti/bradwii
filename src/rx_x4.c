@@ -43,10 +43,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 static const uint8_t allowed_ch[] = {0x14, 0x1E, 0x28, 0x32, 0x3C, 0x46, 0x50, 0x5A, 0x64, 0x6E, 0x78, 0x82};
 static uint8_t packet[16], channel, counter;
 static uint8_t txid[4];
-static unsigned long timeout_timer;
 void init_a7105(void);
 bool hubsan_check_integrity(void);
 void update_crc(void);
+
+int lost = 0;
 
 extern globalstruct global;
 
@@ -70,7 +71,7 @@ void hubsan_build_bind_packet(uint8_t bindstate)
 {
     packet[0] = bindstate;
     packet[1] = (bindstate!=0x0a)? channel : counter;
-    packet[6] = 0x08;
+  	packet[6] = 0x08;
     packet[7] = 0xe4;
     packet[8] = 0xea;	
     packet[9] = 0x9e;
@@ -94,18 +95,26 @@ void init_a7105(void)
     A7105_WriteRegister(A7105_20_CODE_II, 0x17);
     A7105_WriteRegister(A7105_29_RX_DEM_TEST_I, 0x47);
     A7105_Strobe(A7105_STANDBY);
-    A7105_WriteRegister(A7105_02_CALC,0x01);
+/* What is the correct calibration procedure?
+	A7105_Strobe (A7105_PLL);
+	 A7105_WriteRegister(A7105_02_CALC,0x01);
+	 A7105_WriteRegister(A7105_02_CALC,0x02);
+	 A7105_WriteRegister(A7105_02_CALC,0x02);
+	 A7105_Strobe(A7105_RX);
+*/  
+  	A7105_WriteRegister(A7105_02_CALC,0x01);
     A7105_WriteRegister(A7105_0F_PLL_I,0x00);
     A7105_WriteRegister(A7105_02_CALC,0x02);
     A7105_WriteRegister(A7105_0F_PLL_I,0xA0);
     A7105_WriteRegister(A7105_02_CALC,0x02);
     A7105_Strobe(A7105_STANDBY);
+
 }
 
 void waitTRXCompletion(void)
 {
     while(( A7105_ReadRegister(A7105_00_MODE) & A7105_MODE_TRER_MASK)) 
-        ;
+        if (packet[2] ==1) break; //throttle is high
 }
 
 void strobeTXRX(void)
@@ -122,7 +131,7 @@ void bind()
 {
     uint8_t chan=0;
 	
-    while(1){
+    while(1){   //Negotiate Channel
 			
         if( lib_timers_gettimermicroseconds(0) % 500000 > 250000)
             leds_set(LED1 | LED5);
@@ -142,17 +151,17 @@ void bind()
                 break;
             }
             if(A7105_ReadRegister(A7105_00_MODE) & A7105_MODE_TRER_MASK){
-                continue;
+                continue; //received nothing
             }else{
                 A7105_ReadPayload((uint8_t*)&packet, sizeof(packet)); 
                 A7105_Strobe(A7105_RST_RDPTR);
                 if (packet[0]==1){
-                    break;
+                    break; //picked a channel
                 }	
             }
         }	
         if (packet[0]==1){
-            break;
+            break; //break from 2nd loop
         }
     }
     channel = packet[1];
@@ -176,8 +185,8 @@ void bind()
     waitTRXCompletion();
 
     A7105_WriteID(((uint32_t)packet[2] << 24) | ((uint32_t)packet[3] << 16) | ((uint32_t)packet[4] << 8) | packet[5]);
-	
-    while(1) { // useless block ?
+    /*	
+    while(1) { // reset read pointer over and over ?
         A7105_Strobe(A7105_RX);
         waitTRXCompletion();
         A7105_Strobe(A7105_RST_RDPTR);
@@ -186,7 +195,7 @@ void bind()
             break;
         }
     }
-	
+	  */
     while(1){
         hubsan_build_bind_packet(2);
         A7105_Strobe(A7105_STANDBY);
@@ -209,15 +218,16 @@ void bind()
         A7105_ReadPayload((uint8_t*)&packet, sizeof(packet));
         if (counter==9){
             break;
+            }
         }
-    }
 	
-    A7105_WriteRegister(A7105_1F_CODE_I,0x0F); //CRC option CRC enabled adress 0x1f data 1111(CRCS=1,IDL=4bytes,PML[1:1]=4 bytes)
-    //A7105_WriteRegister(0x28, 0x1F);//set Power to "1" dbm max value.
+     A7105_WriteRegister(A7105_1F_CODE_I,0x0F); //CRC option CRC enabled adress 0x1f data 1111(CRCS=1,IDL=4bytes,PML[1:1]=4 bytes)
+    //A7105_WriteRegister(0x28, 0x1F);//set Power to "1" dbm max value. You can for ACKs
     A7105_Strobe(A7105_STANDBY);
     for(int i=0;i<4;i++){
         txid[i]=packet[i+11];
     }
+    lost = 0; //reset lost packets
 }
 
 void initrx(void)
@@ -246,21 +256,20 @@ void decodepacket()
 
 void readrx(void) // todo : telemetry
 {
-    if( lib_timers_gettimermicroseconds(timeout_timer) > 14000) {
-        timeout_timer = lib_timers_starttimer();
-        //A7105_Strobe(A7105_RX);
-    }
-    if(A7105_ReadRegister(A7105_00_MODE) & A7105_MODE_TRER_MASK)
-        return; // nothing received
+	  if (lost > 500) return; // lost 500 packets in a row
+		if (lost > 50) { A7105_Strobe(A7105_RST_RDPTR); A7105_Strobe(A7105_RX); } //Pointer stale?
+    
+	  if((A7105_ReadRegister(A7105_00_MODE) & A7105_MODE_TRER_MASK) && packet[2] !=1)
+        lost++;  // lost packet
+  	else lost = 0; //reset count
+	
     A7105_ReadPayload((uint8_t*)&packet, sizeof(packet)); 
     if(!((packet[11]==txid[0])&&(packet[12]==txid[1])&&(packet[13]==txid[2])&&(packet[14]==txid[3])))
         return; // not our TX !
-    if(!hubsan_check_integrity())
-        return; // bad checksum
-    timeout_timer = lib_timers_starttimer();
-    A7105_Strobe(A7105_RST_RDPTR);
-    A7105_Strobe(A7105_RX);
-    decodepacket();
+    A7105_Strobe(A7105_RST_RDPTR); //reset the data pointer
+    A7105_Strobe(A7105_RX); //state machine to read mode
+    if (hubsan_check_integrity()) decodepacket(); //skip packets with bad checksum. Why can't I use the 00 register for this?
     // reset the failsafe timer
     global.failsafetimer = lib_timers_starttimer();
+    
 }
