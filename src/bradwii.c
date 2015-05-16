@@ -657,7 +657,7 @@ lib_serial_sendstring(DEBUGPORT, "\r\n");
                 if(global.batteryvoltage < FP_BATTERY_UNDERVOLTAGE_LIMIT) {
 									 if(batterylowtimer == 0) batterylowtimer = lib_timers_starttimer();
 								}
-								else // if bettery is above limit reset batterylowtimer
+								else // if battery is above limit reset batterylowtimer
 								{
 									batterylowtimer = 0;
 								}
@@ -667,8 +667,14 @@ lib_serial_sendstring(DEBUGPORT, "\r\n");
             lib_adc_startconv();
         } // IF ADC result available			
 				
-			// Its working now. tested on hubsan.
-			if (!(lib_timers_gettimermicroseconds(batterylowtimer) > BATTERY_LOW_TIMER * 1000L)) isbatterylow = true;
+							if (batterylowtimer !=0)
+				{
+				// Its working now. tested on hubsan.
+        unsigned int time = lib_timers_gettimermicroseconds(batterylowtimer);
+			  if (time > BATTERY_LOW_TIMER * 1000L) isbatterylow = true;
+				}
+
+		//		if (!(lib_timers_gettimermicroseconds(batterylowtimer) > BATTERY_LOW_TIMER * 1000L)) isbatterylow = true;
 
 				
 
