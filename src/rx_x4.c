@@ -102,7 +102,7 @@ void init_a7105(void)
 	 A7105_WriteRegister(A7105_02_CALC,0x02);
 	 A7105_Strobe(A7105_RX);
 */  
-  	A7105_WriteRegister(A7105_02_CALC,0x01);
+    A7105_WriteRegister(A7105_02_CALC,0x01);
     A7105_WriteRegister(A7105_0F_PLL_I,0x00);
     A7105_WriteRegister(A7105_02_CALC,0x02);
     A7105_WriteRegister(A7105_0F_PLL_I,0xA0);
@@ -256,19 +256,17 @@ void decodepacket()
 
 void readrx(void) // todo : telemetry
 {
-	  if (lost > 500) return; // lost 500 packets in a row
+	if (lost > 500) return; // lost 500 packets in a row
 		if (lost > 50) { A7105_Strobe(A7105_RST_RDPTR); A7105_Strobe(A7105_RX); } //Pointer stale?
-    
-	  if((A7105_ReadRegister(A7105_00_MODE) & A7105_MODE_TRER_MASK) && packet[2] !=1)
+	if((A7105_ReadRegister(A7105_00_MODE) & A7105_MODE_TRER_MASK) && packet[2] !=1)
         lost++;  // lost packet
   	else lost = 0; //reset count
 	
     A7105_ReadPayload((uint8_t*)&packet, sizeof(packet)); 
-    if(!((packet[11]==txid[0])&&(packet[12]==txid[1])&&(packet[13]==txid[2])&&(packet[14]==txid[3])))
-        return; // not our TX !
     A7105_Strobe(A7105_RST_RDPTR); //reset the data pointer
     A7105_Strobe(A7105_RX); //state machine to read mode
-    if (hubsan_check_integrity()) decodepacket(); //skip packets with bad checksum. Why can't I use the 00 register for this?
+    if ( ((packet[11]==txid[0])&&(packet[12]==txid[1])&&(packet[13]==txid[2])&&(packet[14]==txid[3])) && hubsan_check_integrity() ) 
+        decodepacket(); //skip packets with bad checksum or wrong txid. Why can't I use the 00 register for this?
     // reset the failsafe timer
     global.failsafetimer = lib_timers_starttimer();
     
