@@ -127,6 +127,18 @@ void strobeTXRX(void)
     A7105_Strobe(A7105_RST_RDPTR);
 }
 
+void hubsan_send_voltage()
+{
+    packet[0] = 0xe1;  //Its Telemetry
+    packet[13] = (global.batteryvoltage * 10) >> 16;   //Voltage, comp intensive?
+    update_crc();
+    for (int l =0; l<4; l++)  //Have to send 4 packets.
+    {    A7105_WritePayload((uint8_t*)&packet, sizeof(packet));
+         A7105_Strobe(A7105_TX);
+    }
+    A7105_Strobe(A7105_RX);
+}
+
 void bind() 
 {
     uint8_t chan=0;
@@ -267,6 +279,7 @@ void readrx(void) // todo : telemetry
     A7105_Strobe(A7105_RX); //state machine to read mode
     if ( ((packet[11]==txid[0])&&(packet[12]==txid[1])&&(packet[13]==txid[2])&&(packet[14]==txid[3])) && hubsan_check_integrity() ) 
         decodepacket(); //skip packets with bad checksum or wrong txid. Why can't I use the 00 register for this?
+    hubsan_send_voltage();
     // reset the failsafe timer
     global.failsafetimer = lib_timers_starttimer();
     
