@@ -64,9 +64,15 @@ void getangleerrorfrompilotinput(fixedpointnum * angleerror)
         fixedpointnum sinangledifference = lib_fp_sine(angledifference);
         rxpitchvalue = lib_fp_multiply(global.rxvalues[PITCHINDEX], cosangledifference) + lib_fp_multiply(global.rxvalues[ROLLINDEX], sinangledifference);
         rxrollvalue = lib_fp_multiply(global.rxvalues[ROLLINDEX], cosangledifference) - lib_fp_multiply(global.rxvalues[PITCHINDEX], sinangledifference);
+        #ifdef INVERTED
+		rxrollvalue = - rxrollvalue;
+		#endif
     } else {
         rxpitchvalue = global.rxvalues[PITCHINDEX];
         rxrollvalue = global.rxvalues[ROLLINDEX];
+        #ifdef INVERTED
+		rxrollvalue = - rxrollvalue;
+		#endif
     }
 
     // first, calculate level mode values
