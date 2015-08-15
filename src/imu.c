@@ -159,6 +159,13 @@ void imucalculateestimatedattitude(void)
 {
     readgyro();
     readacc();
+    
+#ifdef INVERTED
+    //Inverted	
+    global.gyrorate[ROLLINDEX] = -global.gyrorate[ROLLINDEX];
+    global.gyrorate[PITCHINDEX] = -global.gyrorate[PITCHINDEX];
+    global.gyrorate[YAWINDEX]   = - global.gyrorate[YAWINDEX];
+#endif
 
     // correct the gyro and acc readings to remove error      
     for (int x = 0; x < 3; ++x) {
