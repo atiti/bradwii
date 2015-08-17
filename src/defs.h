@@ -139,7 +139,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifdef FLYSKY_RX
 #define RXNUMCHANNELS 8
 #else
-#define RXNUMCHANNELS 6
+#define RXNUMCHANNELS 7
 #endif
 
 #ifndef ARMED_MIN_MOTOR_OUTPUT

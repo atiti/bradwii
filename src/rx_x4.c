@@ -41,6 +41,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #define AUX1_FLAG   0x04 
 #define AUX2_FLAG   0x08 
+#define AUX3_FLAG   0x01 
 
 static const uint8_t allowed_ch[] = {0x14, 0x1E, 0x28, 0x32, 0x3C, 0x46, 0x50, 0x5A, 0x64, 0x6E, 0x78, 0x82};
 static uint8_t packet[16], channel, counter;
@@ -267,6 +268,8 @@ void decodepacket()
         lib_fp_lowpassfilter(&global.rxvalues[AUX1INDEX], ((fixedpointnum) (packet[9] & AUX1_FLAG ? 0x7F : -0x7F)) * 513L, global.timesliver, FIXEDPOINTONEOVERONESIXTYITH, TIMESLIVEREXTRASHIFT);
         // "Flip" channel, AUX2 (only on H107L, H107C, H107D and Deviation TXs, high by default)
         lib_fp_lowpassfilter(&global.rxvalues[AUX2INDEX], ((fixedpointnum) (packet[9] & AUX2_FLAG ? 0x7F : -0x7F)) * 513L, global.timesliver, FIXEDPOINTONEOVERONESIXTYITH, TIMESLIVEREXTRASHIFT);
+        lib_fp_lowpassfilter(&global.rxvalues[AUX3INDEX], ((fixedpointnum) (packet[9] & AUX3_FLAG ? 0x7F : -0x7F)) * 513L, global.timesliver, FIXEDPOINTONEOVERONESIXTYITH, TIMESLIVEREXTRASHIFT);
+        // "LED UP" channel, AUX3 (only on H107L, H107C, H107D and Deviation TXs, high by default)
     }
 }
 
