@@ -146,13 +146,13 @@ void initimu(void)
 // SMALL_ANGLE_APPROX not defined
 
 // proper rotation matrix with float sinf and cosf
-#define _sinf(val) sinf(val)
-#define _cosf(val) cosf(val)
+//#define _sinf(val) sinf(val)
+//#define _cosf(val) cosf(val)
 
 // proper rotation matrix with approximations for sin and cos
 // smaller size then above version
-//#define _sinf(val) (val)
-//#define _cosf(val)  (1 - ((val)*(val))/2) 
+#define _sinf(val) (val)
+#define _cosf(val)  (1 - ((val)*(val))/2) 
 #endif
 
 // gravity 1G size from accelerometer

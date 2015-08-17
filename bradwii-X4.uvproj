@@ -361,7 +361,7 @@
             <useXO>0</useXO>
             <VariousControls>
               <MiscControls>--gnu</MiscControls>
-              <Define>X4_BUILD FLYSKY_RX</Define>
+              <Define>X4_BUILD</Define>
               <Undefine></Undefine>
               <IncludePath>lib-Mini51\hal;src;lib-Mini51\CMSIS\Include;lib-Mini51\Device\Nuvoton\Mini51Series\Include;lib-Mini51\StdDriver\inc</IncludePath>
             </VariousControls>
