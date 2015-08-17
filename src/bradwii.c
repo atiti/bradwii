@@ -539,10 +539,10 @@ lib_serial_sendstring(DEBUGPORT, "\r\n");
         if (lib_timers_gettimermicroseconds(global.failsafetimer) > 1000000L) {
             throttleoutput = FPFAILSAFEMOTOROUTPUT;
             isfailsafeactive = true;
-            #if defined(X4_BUILD)
+            #if defined(X4_BUILD) && !defined(FLYSKY_RX) //Doesn't need it I think, will check.
 					  // Try To Re-Bind
-					  // init_a7105();
-   				//	 bind();
+					   init_a7105();
+   				   bind();
 					  #endif
 					   // make sure we are level!
             angleerror[ROLLINDEX] = -global.currentestimatedeulerattitude[ROLLINDEX];

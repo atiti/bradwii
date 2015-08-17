@@ -271,37 +271,29 @@ void decodepacket()
 }
 */
 
+fixedpointnum scaleValue(uint16_t value, uint16_t minInput, uint16_t maxInput, fixedpointnum minOutput, fixedpointnum maxOutput) {
+	fixedpointnum temp=value;
+	if (value<minInput) temp=minInput;
+	if (value>maxInput) temp=maxInput;
+	fixedpointnum scalefactor=(maxOutput-minOutput)/(maxInput-minInput);
+	temp-=(maxInput+minInput)/2;
+	return temp*scalefactor;
+}
+
+
 void decodepacket() {
+  //Some of these are reversed on Devo (roll/yaw), don't forget to fix that.
+	global.rxvalues[ROLLINDEX] = scaleValue(packet[5] + 256 * packet[6], 1000,2000,-65664,64638);
+	global.rxvalues[PITCHINDEX] = scaleValue(packet[7] + 256 * packet[8], 1000,2000,-65664,64638);
+	global.rxvalues[THROTTLEINDEX] = scaleValue(packet[9] + 256 * packet[10], 1000,2000,-65664,64638);
+	global.rxvalues[YAWINDEX] = scaleValue(packet[11] + 256 * packet[12], 1000,2000,-65664,64638);
 
-	//Roll/Yaw may differ on mode1/mode2, switch at tx or here.
-  global.rxvalues[ROLLINDEX] = (packet[5] + 256 * packet[6]);
-  global.rxvalues[PITCHINDEX] = (packet[7] + 256 * packet[8]);
-//	global.rxvalues[THROTTLEINDEX] = (packet[9] + 256 * packet[10]);
-	global.rxvalues[YAWINDEX] = (packet[11] + 256 * packet[12]);
-
-
-
-/*	//	global.rxvalues[AUX1INDEX] = (packet[13] + 256 * packet[14]);
-	global.rxvalues[AUX2INDEX] = (packet[15] + 256 * packet[16]);
-	global.rxvalues[AUX3INDEX] = (packet[17] + 256 * packet[18]);
-	global.rxvalues[AUX4INDEX] = (packet[19] + 256 * packet[20]);
-	*/
-	//Roll/Yaw may differ on mode1/mode2, switch at tx or here.
-	// converts [0;XXXX] to [-1;1] fixed point num
-	// -65k to +65k 
-	lib_fp_lowpassfilter(&global.rxvalues[THROTTLEINDEX], ( ((uint32_t) (packet[9]+256*packet[10])) - PPM_OFFSET ) * 131L , global.timesliver, FIXEDPOINTONEOVERONESIXTYITH, TIMESLIVEREXTRASHIFT);
-//	lib_fp_lowpassfilter(&global.rxvalues[ROLLINDEX], ( ((uint32_t) (packet[5]+256*packet[6])) - PPM_OFFSET ) * 131L, global.timesliver, FIXEDPOINTONEOVERONESIXTYITH, TIMESLIVEREXTRASHIFT);
-//	lib_fp_lowpassfilter(&global.rxvalues[PITCHINDEX], ( ((uint32_t) (packet[7]+256*packet[8])) - PPM_OFFSET ) * 131L , global.timesliver, FIXEDPOINTONEOVERONESIXTYITH, TIMESLIVEREXTRASHIFT);
-//	lib_fp_lowpassfilter(&global.rxvalues[YAWINDEX], ( ((uint32_t) (packet[11]+256*packet[12])) - PPM_OFFSET ) * 131L , global.timesliver, FIXEDPOINTONEOVERONESIXTYITH, TIMESLIVEREXTRASHIFT);
-
-//Aux Channels
-  lib_fp_lowpassfilter(&global.rxvalues[AUX1INDEX], ( ((uint32_t) (packet[13]+256*packet[14])) - PPM_OFFSET ) * 131L , global.timesliver, FIXEDPOINTONEOVERONESIXTYITH, TIMESLIVEREXTRASHIFT);
-	lib_fp_lowpassfilter(&global.rxvalues[AUX2INDEX], ( ((uint32_t) (packet[15]+256*packet[16])) - PPM_OFFSET ) * 131L , global.timesliver, FIXEDPOINTONEOVERONESIXTYITH, TIMESLIVEREXTRASHIFT);
-	lib_fp_lowpassfilter(&global.rxvalues[AUX3INDEX], ( ((uint32_t) (packet[17]+256*packet[18])) - PPM_OFFSET ) * 131L , global.timesliver, FIXEDPOINTONEOVERONESIXTYITH, TIMESLIVEREXTRASHIFT);
-	lib_fp_lowpassfilter(&global.rxvalues[AUX4INDEX], ( ((uint32_t) (packet[19]+256*packet[20])) - PPM_OFFSET ) * 131L , global.timesliver, FIXEDPOINTONEOVERONESIXTYITH, TIMESLIVEREXTRASHIFT);
-
-	
-	
+	//Aux Channels
+	global.rxvalues[AUX1INDEX] = scaleValue(packet[13] + 256 * packet[14], 1000,2000,-65664,65664);
+	global.rxvalues[AUX2INDEX] = scaleValue(packet[15] + 256 * packet[16], 1000,2000,-65664,64638);
+	global.rxvalues[AUX3INDEX] = scaleValue(packet[17] + 256 * packet[18], 1000,2000,-65664,64638);
+	global.rxvalues[AUX4INDEX] = scaleValue(packet[19] + 256 * packet[20], 1000,2000,-65664,64638);
+				
 }
 
 
