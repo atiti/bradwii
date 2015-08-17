@@ -26,11 +26,13 @@ void lib_spi_init(void)
 
     CLK->CLKSEL1 |= CLK_CLKSEL1_SPI_S_HCLK;
 
+    // MFP pin configuration
 #ifdef X4_build 
 	SYS->P0_MFP |= SYS_MFP_P04_SPISS | SYS_MFP_P05_MOSI | SYS_MFP_P06_MISO | SYS_MFP_P07_SPICLK;
 #else
     SYS->P0_MFP |= SYS_MFP_P01_SPISS | SYS_MFP_P05_MOSI | SYS_MFP_P06_MISO | SYS_MFP_P07_SPICLK;
 #endif    
+	  
     //SYS_ResetModule(SPI_RST);
     SYS->IPRSTC2 |=  SYS_IPRSTC2_SPI_RST_Msk;
     SYS->IPRSTC2 &= ~SYS_IPRSTC2_SPI_RST_Msk;

@@ -16,6 +16,8 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+#ifndef FLYSKY_RX
+#warning "Using Hubsan Protocol"
 
 #include "bradwii.h"
 #include "rx.h"
@@ -79,6 +81,7 @@ void hubsan_build_bind_packet(uint8_t bindstate)
     update_crc();
 }
 
+
 void init_a7105(void)
 {
     A7105_Reset();
@@ -102,7 +105,7 @@ void init_a7105(void)
 	 A7105_WriteRegister(A7105_02_CALC,0x02);
 	 A7105_Strobe(A7105_RX);
 */  
-    A7105_WriteRegister(A7105_02_CALC,0x01);
+  	A7105_WriteRegister(A7105_02_CALC,0x01);
     A7105_WriteRegister(A7105_0F_PLL_I,0x00);
     A7105_WriteRegister(A7105_02_CALC,0x02);
     A7105_WriteRegister(A7105_0F_PLL_I,0xA0);
@@ -129,14 +132,15 @@ void strobeTXRX(void)
 
 void hubsan_send_voltage()
 {
-    packet[0] = 0xe1;  //Its Telemetry
-    packet[13] = (global.batteryvoltage * 10) >> 16;   //Voltage, comp intensive?
-    update_crc();
-    for (int l =0; l<4; l++)  //Have to send 4 packets.
-    {    A7105_WritePayload((uint8_t*)&packet, sizeof(packet));
-         A7105_Strobe(A7105_TX);
+	packet[0] = 0xe1;  //Its Telemetry
+	packet[13] = (global.batteryvoltage * 10) >> 16;   //Voltage, comp intensive?
+	update_crc();
+  for (int l =0; l<4; l++)  //Have to send 4 packets.
+    {	A7105_WritePayload((uint8_t*)&packet, sizeof(packet));
+      A7105_Strobe(A7105_TX);
     }
-    A7105_Strobe(A7105_RX);
+  A7105_Strobe(A7105_RX);
+
 }
 
 void bind() 
@@ -267,14 +271,17 @@ void decodepacket()
 }
 
 void readrx(void) // todo : telemetry
-{
-	if (lost > 500) return; // lost 500 packets in a row
+{    
+	
+	  if (lost > 500) return; // lost 500 packets in a row
 		if (lost > 50) { A7105_Strobe(A7105_RST_RDPTR); A7105_Strobe(A7105_RX); } //Pointer stale?
-	if((A7105_ReadRegister(A7105_00_MODE) & A7105_MODE_TRER_MASK) && packet[2] !=1)
+    
+	  if((A7105_ReadRegister(A7105_00_MODE) & A7105_MODE_TRER_MASK) && packet[2] !=1)
         lost++;  // lost packet
   	else lost = 0; //reset count
 	
     A7105_ReadPayload((uint8_t*)&packet, sizeof(packet)); 
+  
     A7105_Strobe(A7105_RST_RDPTR); //reset the data pointer
     A7105_Strobe(A7105_RX); //state machine to read mode
     if ( ((packet[11]==txid[0])&&(packet[12]==txid[1])&&(packet[13]==txid[2])&&(packet[14]==txid[3])) && hubsan_check_integrity() ) 
@@ -284,3 +291,4 @@ void readrx(void) // todo : telemetry
     global.failsafetimer = lib_timers_starttimer();
     
 }
+#endif

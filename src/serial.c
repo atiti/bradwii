@@ -299,9 +299,9 @@ void evaluatecommand(char portnumber, unsigned char *data)
 #if (BATTERY_ADC_CHANNEL != NO_ADC)
     } else if (command == MSP_BAT) { // Send Battery Voltage
 			sendgoodheader(portnumber, 1);
-		#warning "Fixed value for testing!"	
-		sendandchecksumcharacter(portnumber, 40);	
-		// sendandchecksumcharacter(portnumber, global.batteryvoltage);
+//		#warning "Fixed value for testing!"	
+//		sendandchecksumcharacter(portnumber, 40);	
+		  sendandchecksumcharacter(portnumber, global.batteryvoltage);
 #endif
 		}
 			else                        // we don't know this command

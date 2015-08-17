@@ -269,7 +269,6 @@ lib_serial_sendstring(DEBUGPORT, "\r\n");
 #endif
     // set the default i2c speed to 400 kHz.  If a device needs to slow it down, it can, but it should set it back.
     lib_i2c_setclockspeed(I2C_400_KHZ);
-
     global.armed = 0;
     global.navigationmode = NAVIGATIONMODEOFF;
     global.failsafetimer = lib_timers_starttimer();
@@ -524,8 +523,9 @@ lib_serial_sendstring(DEBUGPORT, "\r\n");
             // The AUTOTHROTTLEDEADAREA adjusts the value at which the throttle starts taking effect.  If this
             // value is too low, the aircraft will gain altitude when banked, if it's too low, it will lose
             // altitude when banked. Adjust to suit.
+					
 #define AUTOTHROTTLEDEADAREA FIXEDPOINTCONSTANT(.25)
-
+//#define AUTOTHROTTLEDEADAREA FIXEDPOINTCONSTANT(.35)
             if (global.estimateddownvector[ZINDEX] > FIXEDPOINTCONSTANT(.3)) {
                 // Divide the throttle by the throttleoutput by the z component of the down vector
                 // This is probaly the slow way, but it's a way to do fixed point division
@@ -539,12 +539,12 @@ lib_serial_sendstring(DEBUGPORT, "\r\n");
         if (lib_timers_gettimermicroseconds(global.failsafetimer) > 1000000L) {
             throttleoutput = FPFAILSAFEMOTOROUTPUT;
             isfailsafeactive = true;
-	#if defined(X4_BUILD)
-	  // Try To Re-Bind
-	    init_a7105();
-            bind();
-        #endif
-            // make sure we are level!
+            #if defined(X4_BUILD)
+					  // Try To Re-Bind
+					  // init_a7105();
+   				//	 bind();
+					  #endif
+					   // make sure we are level!
             angleerror[ROLLINDEX] = -global.currentestimatedeulerattitude[ROLLINDEX];
             angleerror[PITCHINDEX] = -global.currentestimatedeulerattitude[PITCHINDEX];
         }
@@ -593,10 +593,10 @@ lib_serial_sendstring(DEBUGPORT, "\r\n");
         if (!global.armed
 #if (MOTORS_STOP==YES)
             || (global.rxvalues[THROTTLEINDEX] < FPSTICKLOW 
-		#ifndef MOTORS_STOP_ALWAYS
-		&& !(global.activecheckboxitems & (CHECKBOXMASKFULLACRO | CHECKBOXMASKSEMIACRO))
-		#endif				
-		)
+				#ifndef MOTORS_STOP_ALWAYS
+				&& !(global.activecheckboxitems & (CHECKBOXMASKFULLACRO | CHECKBOXMASKSEMIACRO))
+				#endif				
+				)
 #endif
             )
             setallmotoroutputs(MIN_MOTOR_OUTPUT);
@@ -642,6 +642,7 @@ lib_serial_sendstring(DEBUGPORT, "\r\n");
                 // (...alternatively multiply global.timesliver by two).      
 								lib_fp_lowpassfilter(&(global.batteryvoltage), batteryvoltage, global.timesliver, FIXEDPOINTONEOVERONEFOURTH, TIMESLIVEREXTRASHIFT);	
 
+								
 #if (BATTERY_ADC_DEBUG)
 	lib_serial_sendstring(DEBUGPORT, "\r\nBANDGAP=");
 	serialprintfixedpoint_no_linebreak(0, bandgapvoltageraw);
@@ -655,9 +656,10 @@ lib_serial_sendstring(DEBUGPORT, "\r\n");
 								
 							  // Start timer if battery is below limit
                 if(global.batteryvoltage < FP_BATTERY_UNDERVOLTAGE_LIMIT) {
-									 if(batterylowtimer == 0) batterylowtimer = lib_timers_starttimer();
-								}
-								else // if battery is above limit reset batterylowtimer
+									if(batterylowtimer == 0) 
+										batterylowtimer = lib_timers_starttimer();
+									}
+								else // if bettery is above limit reset batterylowtimer
 								{
 									batterylowtimer = 0;
 								}
@@ -667,17 +669,16 @@ lib_serial_sendstring(DEBUGPORT, "\r\n");
             lib_adc_startconv();
         } // IF ADC result available			
 				
-							if (batterylowtimer !=0)
+			
+				if (batterylowtimer !=0)
 				{
 				// Its working now. tested on hubsan.
         unsigned int time = lib_timers_gettimermicroseconds(batterylowtimer);
 			  if (time > BATTERY_LOW_TIMER * 1000L) isbatterylow = true;
 				}
 
-		//		if (!(lib_timers_gettimermicroseconds(batterylowtimer) > BATTERY_LOW_TIMER * 1000L)) isbatterylow = true;
-
+			//	if (!(lib_timers_gettimermicroseconds(batterylowtimer) > BATTERY_LOW_TIMER * 1000L)) isbatterylow = true;
 				
-
         // Decide what LEDs have to show
         if(isbatterylow) {
             // Highest priority: Battery voltage
@@ -687,28 +688,29 @@ lib_serial_sendstring(DEBUGPORT, "\r\n");
 #endif 
 				
 #if (BATTERY_ADC_CHANNEL != NO_ADC)				
-	else if(isfailsafeactive) {
+				else if(isfailsafeactive) {
 #else
-	if(isfailsafeactive) {
+				if(isfailsafeactive) {
 #endif					
             // Lost contact with TX
             // Blink LEDs fast alternating
-	    leds_blink_continuous(LED_ALL, 125, 125);
-	    //lib_serial_sendstring(DEBUGPORT, "isfailsafeactive true\r\n");
+						leds_blink_continuous(LED_ALL, 125, 125);
+						//lib_serial_sendstring(DEBUGPORT, "isfailsafeactive true\r\n");
+
         }
 #ifdef USERSETTINGS_CHECKBOXLEDTOGGLE
-	else if(global.activecheckboxitems & CHECKBOXMASKLEDTOGGLE)  { 
-  	    leds_set(LED_NONE);
-	}
-#endif	
+				else if(global.activecheckboxitems & CHECKBOXMASKLEDTOGGLE)  { 
+  					leds_set(LED_NONE);
+				    }
+#endif				
         else if(!global.armed) {
 					  //lib_serial_sendstring(DEBUGPORT, "isfailsafeactive false\r\n");
 
             // Not armed
             // Short blinks
 						leds_blink_continuous(LED_ALL, 50, 450);
-						}
-        else {
+						}	 
+						else {
             // LEDs stay on
 						leds_set(LED_ALL);
         }
@@ -867,6 +869,8 @@ void defaultusersettings(void)
 #ifdef USERSETTINGS_CHECKBOXLEDTOGGLE
 	  usersettings.checkboxconfiguration[CHECKBOXLEDTOGGLE] = USERSETTINGS_CHECKBOXLEDTOGGLE;	
 #endif
+
+
 	// reset the calibration settings
     for (int x = 0; x < 3; ++x) {
         usersettings.compasszerooffset[x] = 0;

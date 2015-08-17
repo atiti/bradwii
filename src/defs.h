@@ -118,6 +118,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // In this firmware: Z=down, X=west
 #define ACC_ORIENTATION(VALUES,X, Y, Z)  {VALUES[XINDEX]  = -Y; VALUES[YINDEX]  = X; VALUES[ZINDEX]  =  Z;}
 
+
+
 #ifndef COMPASS_TYPE
 #define COMPASS_TYPE NO_COMPASS
 #endif
@@ -134,7 +136,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define GPS_TYPE NO_GPS
 #endif
 
-#define RXNUMCHANNELS 6 
+#ifdef FLYSKY_RX
+#define RXNUMCHANNELS 8
+#else
+#define RXNUMCHANNELS 6
+#endif
 
 #ifndef ARMED_MIN_MOTOR_OUTPUT
 #define ARMED_MIN_MOTOR_OUTPUT 1020     // motors spin slowly when armed

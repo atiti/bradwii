@@ -12,7 +12,7 @@
 // Parameter type for lib_adc_select_channel
 typedef enum lib_adc_channel_tag
 {
-	LIB_ADC_CHAN0 = (1 << 0), // Pin AIN0
+  LIB_ADC_CHAN0 = (1 << 0), // Pin AIN0
 	LIB_ADC_CHAN1 = (1 << 1), // ..
 	LIB_ADC_CHAN2 = (1 << 2),
 	LIB_ADC_CHAN3 = (1 << 3),

@@ -21,7 +21,6 @@ serialPort_t *serialUART1(uint32_t baudRate, portMode_t mode)
     s->txBuffer = tx1Buffer;
 #endif
     s->UARTx = UART; // extraneous
-
 #ifdef X4_BUILD
 	//UART can be internally routed to P00 (pin26, TXD) and P01 (pin25, RXD) 
     SYS->P0_MFP &= ~(SYS_MFP_P00_Msk | SYS_MFP_P01_Msk);
@@ -123,7 +122,7 @@ void uartInit()
     //CLK_SetModuleClock(UART_MODULE,CLK_CLKSEL1_UART_S_IRC22M,CLK_CLKDIV_UART(1));
     // SYS_ResetModule(SYS_IPRSTC2_UART_RST_Msk); //be careful may cause loop
 	
-	CLK->CLKSEL1 &= ~CLK_CLKSEL1_UART_S_Msk;
+	  CLK->CLKSEL1 &= ~CLK_CLKSEL1_UART_S_Msk;
     CLK->CLKSEL1 |= CLK_CLKSEL1_UART_S_IRC22M;// Clock source from internal 22.1184MHz RC clock
     CLK->CLKDIV  &= ~CLK_CLKDIV_UART_N_Msk;
     CLK->CLKDIV  |= CLK_CLKDIV_UART(1);

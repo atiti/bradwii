@@ -12,14 +12,14 @@
       <ToolsetName>ARM-ADS</ToolsetName>
       <TargetOption>
         <TargetCommonOption>
-          <Device>MINI54ZAN</Device>
+          <Device>Mini54ZDE</Device>
           <Vendor>Nuvoton</Vendor>
-          <Cpu>IRAM(0x20000000-0x200007FF) IROM(0-0x3FFF) CLOCK(12000000) CPUTYPE("Cortex-M0")</Cpu>
+          <Cpu>IRAM(0x20000000-0x200007FF) IROM(0-0x3FFF) CLOCK(50000000) CPUTYPE("Cortex-M0")</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
-          <StartupFile>"Startup\Nuvoton\Mini51\startup_MINI51.s" ("Nuvoton MINI51 Startup Code")</StartupFile>
-          <FlashDriverDll>UL2CM3(-O206 -S0 -C0 -FO7 -FD20000000 -FC800 -FN1 -FF0MINI51_AP_16 -FS00 -FL04000)</FlashDriverDll>
-          <DeviceId>6142</DeviceId>
-          <RegisterFile>MINI51.h</RegisterFile>
+          <StartupFile>"Startup\Nuvoton\Mini51\startup_MINI51.s" ("Nuvoton Mini51 Startup Code")</StartupFile>
+          <FlashDriverDll></FlashDriverDll>
+          <DeviceId>0</DeviceId>
+          <RegisterFile></RegisterFile>
           <MemoryEnv></MemoryEnv>
           <Cmp></Cmp>
           <Asm></Asm>
@@ -29,7 +29,7 @@
           <SLE66CMisc></SLE66CMisc>
           <SLE66AMisc></SLE66AMisc>
           <SLE66LinkerMisc></SLE66LinkerMisc>
-          <SFDFile>SFD\Nuvoton\Mini51\MINI51AN.SFR</SFDFile>
+          <SFDFile>SFD\Nuvoton\MINI51DE_v1.SFR</SFDFile>
           <bCustSvd>0</bCustSvd>
           <UseEnv>0</UseEnv>
           <BinPath></BinPath>
@@ -106,11 +106,11 @@
           <SimDllName>SARMCM3.DLL</SimDllName>
           <SimDllArguments></SimDllArguments>
           <SimDlgDll>DARMCM1.DLL</SimDlgDll>
-          <SimDlgDllArguments>-pCM0</SimDlgDllArguments>
+          <SimDlgDllArguments></SimDlgDllArguments>
           <TargetDllName>SARMCM3.DLL</TargetDllName>
           <TargetDllArguments></TargetDllArguments>
           <TargetDlgDll>TARMCM1.DLL</TargetDlgDll>
-          <TargetDlgDllArguments>-pCM0</TargetDlgDllArguments>
+          <TargetDlgDllArguments></TargetDlgDllArguments>
         </DllOption>
         <DebugOption>
           <OPTHX>
@@ -135,7 +135,7 @@
           <Target>
             <UseTarget>1</UseTarget>
             <LoadApplicationAtStartup>1</LoadApplicationAtStartup>
-            <RunToMain>1</RunToMain>
+            <RunToMain>0</RunToMain>
             <RestoreBreakpoints>1</RestoreBreakpoints>
             <RestoreWatchpoints>1</RestoreWatchpoints>
             <RestoreMemoryDisplay>1</RestoreMemoryDisplay>
@@ -222,7 +222,7 @@
             <hadIRAM2>0</hadIRAM2>
             <hadIROM2>0</hadIROM2>
             <StupSel>8</StupSel>
-            <useUlib>0</useUlib>
+            <useUlib>1</useUlib>
             <EndSel>0</EndSel>
             <uLtcg>0</uLtcg>
             <RoSelD>3</RoSelD>
@@ -345,12 +345,12 @@
           </ArmAdsMisc>
           <Cads>
             <interw>1</interw>
-            <Optim>4</Optim>
-            <oTime>0</oTime>
+            <Optim>3</Optim>
+            <oTime>1</oTime>
             <SplitLS>0</SplitLS>
             <OneElfS>0</OneElfS>
             <Strict>0</Strict>
-            <EnumInt>0</EnumInt>
+            <EnumInt>1</EnumInt>
             <PlainCh>0</PlainCh>
             <Ropi>0</Ropi>
             <Rwpi>0</Rwpi>
@@ -361,7 +361,7 @@
             <useXO>0</useXO>
             <VariousControls>
               <MiscControls>--gnu</MiscControls>
-              <Define>X4_BUILD</Define>
+              <Define>X4_BUILD FLYSKY_RX</Define>
               <Undefine></Undefine>
               <IncludePath>lib-Mini51\hal;src;lib-Mini51\CMSIS\Include;lib-Mini51\Device\Nuvoton\Mini51Series\Include;lib-Mini51\StdDriver\inc</IncludePath>
             </VariousControls>
@@ -384,7 +384,7 @@
             </VariousControls>
           </Aads>
           <LDads>
-            <umfTarg>0</umfTarg>
+            <umfTarg>1</umfTarg>
             <Ropi>0</Ropi>
             <Rwpi>0</Rwpi>
             <noStLib>0</noStLib>
@@ -393,7 +393,7 @@
             <TextAddressRange>0x00000000</TextAddressRange>
             <DataAddressRange>0x20000000</DataAddressRange>
             <pXoBase></pXoBase>
-            <ScatterFile></ScatterFile>
+            <ScatterFile>.\obj-Mini51\bradwii-X4.sct</ScatterFile>
             <IncludeLibs></IncludeLibs>
             <IncludeLibsPath></IncludeLibsPath>
             <Misc></Misc>
@@ -492,14 +492,29 @@
               <FilePath>.\src\a7105.c</FilePath>
             </File>
             <File>
-              <FileName>defs.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\src\defs.h</FilePath>
-            </File>
-            <File>
               <FileName>leds.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\src\leds.c</FilePath>
+            </File>
+            <File>
+              <FileName>fp_imu.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\fp_imu.c</FilePath>
+            </File>
+            <File>
+              <FileName>rx_flysky.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\rx_flysky.c</FilePath>
+            </File>
+            <File>
+              <FileName>rx_flysky2.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\rx_flysky2.c</FilePath>
+            </File>
+            <File>
+              <FileName>rx_flysky1.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\rx_flysky1.c</FilePath>
             </File>
           </Files>
         </Group>

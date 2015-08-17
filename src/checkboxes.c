@@ -24,11 +24,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 extern globalstruct global;
 extern usersettingsstruct usersettings;
 
-#ifndef X4_BUILD
+//#ifndef X4_BUILD
 char checkboxnames[] /* PROGMEM */  =   // names for dynamic generation of config GUI
     // this could be moved to program memory if we wanted to save a few bytes of space.
     "Arm;" "Thr. Helper;" "Alt. Hold;" "Mag. Hold;" "Pos. Hold;" "Ret. Home;" "Semi Acro;" "Full Acro;" "High Rates;" "High Angle;" "Auto Tune;" "Uncrashable;" "Headfree;" "Yaw Hold;" "LED1;" "LED2;" "AllLED;";
-#endif
+//#endif
 
 // each checkbox item has a checkboxvalue.  The bits in this value represent low, medium, and high checkboxes
 // for each of the aux switches, just as they show up in most config programs.

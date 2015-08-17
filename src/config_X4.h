@@ -31,14 +31,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #define RX_TYPE RX_SOFT_3_WIRE_SPI_PROTOCOL
 
+//Choose Protocol : most go in build options
+//#define FLYSKY_RX
+
 // Choose a channel order if you don't like the default for your receiver type selected above
 //#define RX_CHANNEL_ORDER         THROTTLEINDEX,ROLLINDEX,PITCHINDEX,YAWINDEX,AUX1INDEX,AUX2INDEX,AUX3INDEX,AUX4INDEX,8,9,10,11 //For Graupner/Spektrum
 //#define RX_CHANNEL_ORDER         ROLLINDEX,PITCHINDEX,THROTTLEINDEX,YAWINDEX,AUX1INDEX,AUX2INDEX,AUX3INDEX,AUX4INDEX,8,9,10,11 //For Robe/Hitec/Futaba
 //#define RX_CHANNEL_ORDER         ROLLINDEX,PITCHINDEX,YAWINDEX,THROTTLEINDEX,AUX1INDEX,AUX2INDEX,AUX3INDEX,AUX4INDEX,8,9,10,11 //For Multiplex
 //#define RX_CHANNEL_ORDER         PITCHINDEX,ROLLINDEX,THROTTLEINDEX,YAWINDEX,AUX1INDEX,AUX2INDEX,AUX3INDEX,AUX4INDEX,8,9,10,11 //For some Hitec/Sanwa/Others
-
-// uncomment to set the number of RX channels, otherwise it will default to what the control board/receiver can handle
-//#define RXNUMCHANNELS 8
 
 // arm/disarm Q4 with pitch high/low, or yaw high/low on X4.  Q4
 // TX has a narrow range on the horizontal stick axes, using pitch
@@ -53,8 +53,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //#define STICK_DISARM STICK_COMMAND_YAW_LOW
 //#define STICK_ARM STICK_COMMAND_PITCH_HIGH
 //#define STICK_DISARM STICK_COMMAND_PITCH_LOW
-#define STICK_ARM STICK_COMMAND_ROLL_HIGH+STICK_COMMAND_PITCH_LOW
-#define STICK_DISARM STICK_COMMAND_ROLL_LOW+STICK_COMMAND_PITCH_LOW
+//#define STICK_ARM STICK_COMMAND_ROLL_HIGH+STICK_COMMAND_PITCH_LOW
+//#define STICK_DISARM STICK_COMMAND_ROLL_LOW+STICK_COMMAND_PITCH_LOW
 
 #endif
 
@@ -70,15 +70,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // Be sure to uncomment and set the baud rate for any enabled serial ports.
 // note: two examples are given below, but any combination of ports can be added together.
 
-//#define MULTIWII_CONFIG_SERIAL_PORTS NOSERIALPORT
-//#define MULTIWII_CONFIG_SERIAL_PORTS NOSERIALPORT
-//#define MULTIWII_CONFIG_SERIAL_PORTS SERIALPORT1
-//#define MULTIWII_CONFIG_SERIAL_PORTS SERIALPORT1+SERIALPORT3
+//#define MULTIWII_CONFIG_SERIAL_PORTS SERIALPORT0
+
+#define MULTIWII_CONFIG_SERIAL_PORTS NOSERIALPORT
+
 
 //#define SERIAL_0_BAUD 115200
-//#define SERIAL_1_BAUD 9600
-//#define SERIAL_2_BAUD 9600
-//#define SERIAL_3_BAUD 115200
+
 
 // Choose whether to include code for a GPS and set parameters for the GPS, otherwise it will default o what the control board come with
 #define GPS_TYPE NO_GPS // select if no GPS is going to be used
@@ -105,6 +103,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // Un-comment and set to YES or NO to override the default value.
 // When YES, motors will stop when throttle stick is below STICK_RANGE_LOW (see below) and not in acro or semi acro mode.
 #define MOTORS_STOP YES
+
 //Motors stop in acro/semi acro
 #define MOTORS_STOP_ALWAYS
 
@@ -117,8 +116,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //#define THROTTLE_TO_MOTOR_OFFSET 0
 
 // Divide the Aux inputs into low, medium, and high using the following divisions
+//Hubsan Proto
 #define AUX_MID_RANGE_LOW 1300
 #define AUX_MID_RANGE_HIGH 1700
+//FlySky
+//#define AUX_MID_RANGE_LOW 1000
+//#define AUX_MID_RANGE_HIGH 1990
 
 // Define low and high values for stick commands
 #if CONTROL_BOARD_TYPE == CONTROL_BOARD_HUBSAN_Q4
@@ -151,7 +154,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define ESC_CALIB_HIGH MAX_MOTOR_OUTPUT
 
 // un-comment if you don't want to include autotune code
-#define NO_AUTOTUNE
+//#define NO_AUTOTUNE
 
 // To adjust how agressive the tuning is, adjust the AUTOTUNEMAXOSCILLATION value.  A larger
 // value will result in more agressive tuning. A lower value will result in softer tuning.
@@ -175,7 +178,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // 0x19 // 188 Hz Low pass filter, 1 kHz internal sample rate
 // 0x1A // 98 Hz Low pass filter, 1 kHz internal sample rate
 // 0x1B // 42 Hz Low pass filter, 1 kHz internal sample rate
-// 0x1C // 20 Hz Low pass filter, 1 kHz internal sample rate
+// 0x1C // 20 Hz Low pass filter, 1 kHz internal sample rate 
 // 0x1D // 10 Hz Low pass filter, 1 kHz internal sample rate
 // 0x1E // 5 Hz Low pass filter, 1 kHz internal sample rate
 
@@ -190,6 +193,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // 0x60 110: Low pass filter set to 8 Hz bandwidth
 
 #define ACC_LOW_PASS_FILTER 0x30  // 0x30 = 64 Hz (MC3210)
+
+
+#define ACC_COMPLIMENTARY_FILTER_TIME_PERIOD 2.0
 
 #define UNCRAHSABLE_MAX_ALTITUDE_OFFSET 30.0    // 30 meters above where uncrashability was enabled
 #define UNCRAHSABLE_RADIUS 50.0 // 50 meter radius
@@ -209,6 +215,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define BATTERY_ADC_CHANNEL (1<<4)
 #elif CONTROL_BOARD_TYPE == CONTROL_BOARD_HUBSAN_H107L
 #define BATTERY_ADC_CHANNEL (1<<5)
+//#define BATTERY_ADC_CHANNEL LIB_ADC_CHAN5
 #endif
 
 // ADC external reference voltage.
@@ -246,7 +253,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // If your setup has less voltage drop or you want to be notified earlier,
 // set this value higher.
 // Unit: Volt
+#if MULTIWII_CONFIG_SERIAL_PORTS == NOSERIALPORT
 #define BATTERY_UNDERVOLTAGE_LIMIT 3.2
+#else
+#define BATTERY_UNDERVOLTAGE_LIMIT 2.99 //be safe, with serial port off by ~.25v
+#endif
 
 // If battery voltage is below BATTTERY_UNDERVOLTAGE_LIMIT for a defined amount of time
 // enables the battery low indicator all the time until battery is replaced
@@ -295,20 +306,31 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define USERSETTINGS_PID_DGAIN_NAVIGATIONINDEX 188L << 8;   				// .188 on configurator
 #elif CONTROL_BOARD_TYPE == CONTROL_BOARD_HUBSAN_H107L
 
+//3.5/0.0/22 or 20 Y10
+//3.0/0.010/24
+//SuperX
+// P 3.1/0.025/30
+// R 3.1/0.025/30
+// Y 6.5/0.045/30
+//Tuned
+// P 1.4/0.000/19.0
+// R 1.4/0.003/19.0
+// Y 6.0/0.003/19.0
+
 // pitch PIDs
-#define USERSETTINGS_PID_PGAIN_PITCHINDEX PID_TO_CONFIGURATORVALUE_P(3.5)
-#define USERSETTINGS_PID_IGAIN_PITCHINDEX PID_TO_CONFIGURATORVALUE_I(0.004)
-#define USERSETTINGS_PID_DGAIN_PITCHINDEX PID_TO_CONFIGURATORVALUE_D(22.0)
+#define USERSETTINGS_PID_PGAIN_PITCHINDEX PID_TO_CONFIGURATORVALUE_P(1.3)
+#define USERSETTINGS_PID_IGAIN_PITCHINDEX PID_TO_CONFIGURATORVALUE_I(0)
+#define USERSETTINGS_PID_DGAIN_PITCHINDEX PID_TO_CONFIGURATORVALUE_D(20.0)
  
 // roll PIDs
-#define USERSETTINGS_PID_PGAIN_ROLLINDEX PID_TO_CONFIGURATORVALUE_P(3.5)
-#define USERSETTINGS_PID_IGAIN_ROLLINDEX PID_TO_CONFIGURATORVALUE_I(0.004)
-#define USERSETTINGS_PID_DGAIN_ROLLINDEX PID_TO_CONFIGURATORVALUE_D(22.0)
+#define USERSETTINGS_PID_PGAIN_ROLLINDEX PID_TO_CONFIGURATORVALUE_P(1.3)
+#define USERSETTINGS_PID_IGAIN_ROLLINDEX PID_TO_CONFIGURATORVALUE_I(0)
+#define USERSETTINGS_PID_DGAIN_ROLLINDEX PID_TO_CONFIGURATORVALUE_D(20.0)
 
 // yaw PIDs
-#define USERSETTINGS_PID_PGAIN_YAWINDEX PID_TO_CONFIGURATORVALUE_P(10.0)
-#define USERSETTINGS_PID_IGAIN_YAWINDEX PID_TO_CONFIGURATORVALUE_I(0.000)
-#define USERSETTINGS_PID_DGAIN_YAWINDEX PID_TO_CONFIGURATORVALUE_D(22.0)
+#define USERSETTINGS_PID_PGAIN_YAWINDEX PID_TO_CONFIGURATORVALUE_P(1.3)
+#define USERSETTINGS_PID_IGAIN_YAWINDEX PID_TO_CONFIGURATORVALUE_I(0)
+#define USERSETTINGS_PID_DGAIN_YAWINDEX PID_TO_CONFIGURATORVALUE_D(20.0)
 
 //
 #define USERSETTINGS_PID_PGAIN_ALTITUDEINDEX 27L << 7;   						// 2.7 on configurator
@@ -316,6 +338,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define USERSETTINGS_PID_PGAIN_NAVIGATIONINDEX 25L << 11;   				// 2.5 on configurator
 #define USERSETTINGS_PID_DGAIN_NAVIGATIONINDEX 188L << 8;   				// .188 on configurator
 #endif
+
 
 // Checkbox settings...
 #if CONTROL_BOARD_TYPE == CONTROL_BOARD_HUBSAN_Q4
@@ -335,18 +358,23 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // #define USERSETTINGS_CHECKBOXYAWHOLD
 
 #elif CONTROL_BOARD_TYPE == CONTROL_BOARD_HUBSAN_H107L
-//#define USERSETTINGS_CHECKBOXARM CHECKBOXMASKAUX1LOW
+#define USERSETTINGS_CHECKBOXARM CHECKBOXMASKAUX1LOW
 #define USERSETTINGS_CHECKBOXAUTOTHROTTLE CHECKBOXMASKAUX2LOW
-#define USERSETTINGS_CHECKBOXYAWHOLD CHECKBOXMASKAUX1LOW
+//#define USERSETTINGS_CHECKBOXYAWHOLD CHECKBOXMASKAUX1LOW
 #define USERSETTINGS_CHECKBOXSEMIACRO 0
-#define USERSETTINGS_CHECKBOXFULLACRO 0
+//#define USERSETTINGS_CHECKBOXFULLACRO CHECKBOXMASKAUX1LOW
 #define USERSETTINGS_CHECKBOXHIGHANGLE 0
 //#define USERSETTINGS_CHECKBOXHIGHRATES CHECKBOXMASKAUX1LOW
 //#define USERSETTINGS_CHECKBOXHIGHANGLE CHECKBOXMASKAUX1LOW
 //#define USERSETTINGS_CHECKBOXAUTOTUNE CHECKBOXMASKAUX1LOW
-//#define USERSETTINGS_CHECKBOXLEDTOGGLE CHECKBOXMASKAUX1LOW
+
+#define USERSETTINGS_CHECKBOXLEDTOGGLE CHECKBOXMASKAUX3LOW
+#define USERSETTINGS_CHECKBOXHEADFREE CHECKBOXMASKAUX4LOW
 
 #define EEPROM_SIZE 512
+
+//#define INVERTED
+//#define FP_IMU - Must be done globally for now in target options.
 
 //No gear
 //#define USERSETTINGS_CHECKBOXALTHOLD
@@ -354,6 +382,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // #define USERSETTINGS_CHECKBOXPOSITIONHOLD
 // #define USERSETTINGS_CHECKBOXRETURNTOHOME
 // #define USERSETTINGS_CHECKBOXUNCRASHABLE
-// #define USERSETTINGS_CHECKBOXHEADFREE
+
+
+
 
 #endif

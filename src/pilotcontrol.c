@@ -52,6 +52,7 @@ void resetpilotcontrol(void)
 
 void getangleerrorfrompilotinput(fixedpointnum * angleerror)
 {
+	
     // sets the ange errors for roll, pitch, and yaw based on where the pilot has the tx sticks.
     fixedpointnum rxrollvalue;
     fixedpointnum rxpitchvalue;
@@ -64,15 +65,18 @@ void getangleerrorfrompilotinput(fixedpointnum * angleerror)
         fixedpointnum sinangledifference = lib_fp_sine(angledifference);
         rxpitchvalue = lib_fp_multiply(global.rxvalues[PITCHINDEX], cosangledifference) + lib_fp_multiply(global.rxvalues[ROLLINDEX], sinangledifference);
         rxrollvalue = lib_fp_multiply(global.rxvalues[ROLLINDEX], cosangledifference) - lib_fp_multiply(global.rxvalues[PITCHINDEX], sinangledifference);
+
         #ifdef INVERTED
-		rxrollvalue = - rxrollvalue;
-		#endif
+			  rxrollvalue = - rxrollvalue;
+			  #endif
+
     } else {
         rxpitchvalue = global.rxvalues[PITCHINDEX];
         rxrollvalue = global.rxvalues[ROLLINDEX];
-        #ifdef INVERTED
-		rxrollvalue = - rxrollvalue;
-		#endif
+			
+			  #ifdef INVERTED
+			  rxrollvalue = - rxrollvalue;
+			  #endif
     }
 
     // first, calculate level mode values
@@ -191,25 +195,28 @@ void getangleerrorfrompilotinput(fixedpointnum * angleerror)
     angleerror[ROLLINDEX] = lib_fp_multiply(angleerror[ROLLINDEX], acromodefraction) + lib_fp_multiply(levelmoderollangleerror, levelmodefraction);
     angleerror[PITCHINDEX] = lib_fp_multiply(angleerror[PITCHINDEX], acromodefraction) + lib_fp_multiply(levelmodepitchangleerror, levelmodefraction);
 
-//if (1) // auto banking (experimental)
-//   {
-//   static fixedpointnum accrollangle=0;
-//   
-//   // calculate the current roll angle
-//   
-//   fixedpointnum newrollangle=  lib_fp_atan2(global.acc_g_vector[XINDEX] , global.acc_g_vector[ZINDEX]);
-//
-//   lib_fp_lowpassfilter(&accrollangle,newrollangle,global.timesliver,FIXEDPOINTCONSTANT(8),TIMESLIVEREXTRASHIFT);
-//   angleerror[ROLLINDEX]-=accrollangle;
-//global.debugvalue[0]=newrollangle>>FIXEDPOINTSHIFT;
-//global.debugvalue[1]=accrollangle>>FIXEDPOINTSHIFT;
-//   }
-}
+/*
+   // auto banking (experimental)
+   {
+   static fixedpointnum accrollangle=0;
+   
+   // calculate the current roll angle
+   
+   fixedpointnum newrollangle=  lib_fp_atan2(global.acc_g_vector[XINDEX] , global.acc_g_vector[ZINDEX]);
 
+   lib_fp_lowpassfilter(&accrollangle,newrollangle,global.timesliver,FIXEDPOINTCONSTANT(8),TIMESLIVEREXTRASHIFT);
+   angleerror[ROLLINDEX]-=accrollangle;
+   global.debugvalue[0]=newrollangle>>FIXEDPOINTSHIFT;
+   global.debugvalue[1]=accrollangle>>FIXEDPOINTSHIFT;
+   }
+*/ 
+	}
+      
 /*
 Below is some old code that was using vectors.  The advantage is that it avoids singularities.  It also chooses the shortest
 rotational path to the desired attitude.  The downside is that it's slow and it's difficult to mix flight modes.
-
+*/
+/*
 #define FIXEDPOINTONEOVER500 (FIXEDPOINTONE/500L)
 // convert from r/c input milliseconds (stick position) to a rotation rate (fixedpointnum degrees per second)
 #define ROTATIONRATEMULTIPLIER ((2L<<FIXEDPOINTSHIFT)/500L) 
@@ -246,7 +253,7 @@ void getangleerrorfrompilotinput(fixedpointnum *angleerror)
    desireddownvector[1]=lib_fp_multiply(sineofpitchangle,cosineofrollangle);
    desireddownvector[2]=lib_fp_multiply(cosineofpitchangle,cosineofrollangle);
    
-   if (global.rxvalues[THROTTLEINDEX]<FPARMEDMINMOTOROUTPUT)
+   if (global.rxvalues[THROTTLEINDEX]<ARMED_MIN_MOTOR_OUTPUT)
       { // we probably aren't off the ground.
       // don't accumulate error.  Use a low pass filter to bleed the error off slowly so we don't get abrupt motion if we are still in the air
       // don't drift while sitting on the ground
@@ -329,9 +336,9 @@ void getangleerrorfrompilotinput(fixedpointnum *angleerror)
       
    lastyawerror=angleerror[YAWINDEX];
    }
-   
-#else // complex control is slower, but offers better control.
-
+  */ 
+//#else // complex control is slower, but offers better control.
+/*
 #define FIXEDPOINTONEOVER500 (FIXEDPOINTONE/500L)
 
 fixedpointnum desiredwestvector[3]={FIXEDPOINTONE,0,0};
@@ -378,11 +385,11 @@ void getangleerrorfrompilotinput(fixedpointnum *angleerror)
    desiredangle = lib_fp_multiply(global.rxvalues[PITCHINDEX]-FPRXMIDPOINT,DESIREDANGLEMULTIPLIER);
 
    fixedpointnum desiredangle2=angle;
-//   if ((lastpitcherror<MAXANGLEERROR && desiredangle2>0) || (lastpitcherror>-MAXANGLEERROR && desiredangle2<0))
+   if ((lastpitcherror<MAXANGLEERROR && desiredangle2>0) || (lastpitcherror>-MAXANGLEERROR && desiredangle2<0))
       desiredangle2+=lib_fp_multiply(lib_fp_multiply(global.rxvalues[PITCHINDEX]-FPRXMIDPOINT,usersettings.maxyawrate*ROTATIONRATEMULTIPLIER),global.timesliver)>>TIMESLIVEREXTRASHIFT;
    
    // mix the desired angles based on how far we are rolled.
-   fixedpointnum fraction=lib_fp_multiply(lib_fp_abs(currentrollangle),FIXEDPOINTONE/MAXDESIREDANGLE);
+   fixedpointnum fraction=lib_fp_multiply(lib_fp_abs(currentrollangle),FIXEDPOINTONE/FP_LEVEL_MODE_MAX_TILT);
    desiredangle=lib_fp_multiply(fraction,desiredangle2)+lib_fp_multiply(FIXEDPOINTONE-fraction,desiredangle);
    
    angle=desiredangle-angle;
@@ -419,7 +426,7 @@ void getangleerrorfrompilotinput(fixedpointnum *angleerror)
    desireddownvector[1]=lib_fp_multiply(sineofpitchangle,cosineofrollangle);
    desireddownvector[2]=lib_fp_multiply(cosineofpitchangle,cosineofrollangle);
    
-   if (global.rxvalues[THROTTLEINDEX]<FPARMEDMINMOTOROUTPUT)
+   if (global.rxvalues[THROTTLEINDEX]<ARMED_MIN_MOTOR_OUTPUT)
       { // we probably aren't off the ground.
       // don't accumulate error.  Use a low pass filter to bleed the error off slowly so we don't get abrupt motion if we are still in the air
       // don't drift while sitting on the ground

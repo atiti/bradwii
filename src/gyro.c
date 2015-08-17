@@ -48,6 +48,7 @@ void initgyro(void)
     lib_i2c_writereg(MPU3050_ADDRESS, 0x3E, 0x03); //PWR_MGMT_1 -- SLEEP 0; CYCLE 0; TEMP_DIS 0; CLKSEL 3 (PLL with Z Gyro reference)
     lib_i2c_writereg(MPU3050_ADDRESS, 0x16, MPU3050_DLPF_CFG + 0x18); // Gyro CONFIG -- EXT_SYNC_SET 0 (disable input pin for data sync) ; default DLPF_CFG = 0 => GYRO bandwidth = 256Hz); -- FS_SEL = 3: Full scale set to 2000 deg/sec
     lib_i2c_writereg(MPU3050_ADDRESS, 0x15, SAMPLE_RATE_DIVISOR);
+
 }
 
 void readgyro(void)

@@ -18,7 +18,7 @@ void lib_adc_init(void) {
 	CLK_EnableModuleClock(ADC_MODULE);
 
 // At the moment just	for testing!
-// Disabel SetModuleClock for ADC when using serial because the ClockModul is already setup to meet the BAUD settings
+// Disable SetModuleClock for ADC when using serial because the ClockModul is already setup to meet the BAUD settings
 #if MULTIWII_CONFIG_SERIAL_PORTS == NOSERIALPORT
   // 22MHz / 75 = 293kHz clock for ADC module
   // -> approx 137µs conversion time.

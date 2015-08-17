@@ -1,3 +1,5 @@
+#ifndef FP_IMU
+#warning "Using Fixed Point IMU"
 /* 
 Copyright 2013 Brad Quick
 
@@ -76,7 +78,7 @@ void calibrategyroandaccelerometer(bool both)
 #ifdef X4_BUILD
     uint8_t ledstatus;
 #endif
-
+    //erase settings
     for (int x = 0; x < 3; ++x) {
         usersettings.gyrocalibration[x] = 0;
         if(both)
@@ -85,8 +87,8 @@ void calibrategyroandaccelerometer(bool both)
 
     fixedpointnum totaltime = 0;
 
-    // calibrate the gyro and acc
-    while (totaltime < (FIXEDPOINTCONSTANT(4) << TIMESLIVEREXTRASHIFT)) // 4 seconds
+    // calibrate the gyro and acc //4
+    while (totaltime < (FIXEDPOINTCONSTANT(8) << TIMESLIVEREXTRASHIFT)) // 4 seconds
     {
         readgyro();
         if(both) {
@@ -108,10 +110,10 @@ void calibrategyroandaccelerometer(bool both)
             leds_set(LED2); // X4_LED_FR
             break;
         case 2:
-            leds_set(LED5); // X4_LED_RR
+            leds_set(LED3); // X4_LED_RR
             break;
         case 3:
-            leds_set(LED6); // X4_LED_RL
+            leds_set(LED4); // X4_LED_RL
             break;
         }
 #else
@@ -130,12 +132,11 @@ void initimu(void)
     // calibrate both sensors if we didn't load any data from eeprom
     if (global.usersettingsfromeeprom == 0){
         calibrategyroandaccelerometer(true);
-	// Save in EEPROM
+			  // Save in EEPROM
         writeusersettingstoeeprom();
-	}
-//For my X4, nothing special about the gyro.
+		}
 //    else // only gyro
-//        calibrategyroandaccelerometer(false);
+//      calibrategyroandaccelerometer(false);
 
     global.estimateddownvector[XINDEX] = 0;
     global.estimateddownvector[YINDEX] = 0;
@@ -159,15 +160,14 @@ void imucalculateestimatedattitude(void)
 {
     readgyro();
     readacc();
-    
+
 #ifdef INVERTED
     //Inverted	
     global.gyrorate[ROLLINDEX] = -global.gyrorate[ROLLINDEX];
     global.gyrorate[PITCHINDEX] = -global.gyrorate[PITCHINDEX];
     global.gyrorate[YAWINDEX]   = - global.gyrorate[YAWINDEX];
 #endif
-
-    // correct the gyro and acc readings to remove error      
+  	// correct the gyro and acc readings to remove error      
     for (int x = 0; x < 3; ++x) {
         global.gyrorate[x] = global.gyrorate[x] + usersettings.gyrocalibration[x];
         global.acc_g_vector[x] = global.acc_g_vector[x] + usersettings.acccalibration[x];
@@ -288,3 +288,5 @@ void imucalculateestimatedattitude(void)
     global.currentestimatedeulerattitude[YAWINDEX] = lib_fp_atan2(global.estimatedwestvector[YINDEX], xvalue) + FP_MAG_DECLINATION_DEGREES;
     lib_fp_constrain180(&global.currentestimatedeulerattitude[YAWINDEX]);
 }
+#endif
+
