@@ -20,6 +20,9 @@ Manual accelerometer calibration:
 When burning a firmware with new PID control parameters, checkboxconfig or anything else from the usersettings struct make sure to erase the data flash.
 Otherwise the firmware will continue to use the old data. 
 
+Serial Port:
+http://www.rcgroups.com/forums/showthread.php?t=2278850&page=34
+If you can solder real small :)
 
 Credits
 ======
@@ -29,3 +32,4 @@ Credits
  * The Mini54ZAN ARM port to V202/JD385 was done by Victor: https://github.com/victzh/bradwii
  * The Hubsan X4 H107L port was done by Goebish: https://github.com/goebish/bradwii-X4
  * Extra work on the H107L port by TheLastMutt: https://github.com/TheLastMutt/bradwii-x4-gcc
+ * silverxxx (imu/flysky) - woogluf (flysky)
