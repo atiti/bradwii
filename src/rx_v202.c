@@ -229,8 +229,9 @@ void initrx(void)
     NRF24L01_WriteReg(NRF24L01_03_SETUP_AW, 0x03);   // 5-byte RX/TX address
     NRF24L01_WriteReg(NRF24L01_04_SETUP_RETR, 0xFF); // 4ms retransmit t/o, 15 tries
 //    NRF24L01_WriteReg(NRF24L01_05_RF_CH, 0x08);      // Channel 8 - bind
-    NRF24L01_SetBitrate(NRF24L01_BR_1M);                          // 1Mbps
-    NRF24L01_SetPower(TXPOWER_100mW);
+ //   NRF24L01_SetBitrate(NRF24L01_BR_1M);                          // 1Mbps
+    NRF24L01_SetBitrate(NRF24L01_BR_250K);         //250k for longer range.
+  	NRF24L01_SetPower(TXPOWER_100mW);
     NRF24L01_WriteReg(NRF24L01_07_STATUS, 0x70);     // Clear data ready, data sent, and retransmit
     NRF24L01_WriteReg(NRF24L01_11_RX_PW_P0, V2X2_PAYLOAD_SIZE);  // bytes of data payload for pipe 0
     NRF24L01_WriteReg(NRF24L01_17_FIFO_STATUS, 0x00); // Just in case, no real bits to write here
