@@ -34,6 +34,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define CONTROL_BOARD_JXD_JD385 101
 #define CONTROL_BOARD_HUBSAN_H107L 102
 #define CONTROL_BOARD_HUBSAN_Q4 103
+#define CONTROL_BOARD_JJRC_H6C 104
 
 // MICROCONTROLLER_TYPE's
 #define MEGA2560 0
