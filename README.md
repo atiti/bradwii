@@ -7,7 +7,9 @@ Bradwii for Hubsan H107L v2.3.
  * mCube MC3210 3-Axis Accelerometer
  * InvenSense MPU-3050 3-Axis MEMS Gyroscope
 
-
+####Also supports JJRC & JXD nRF quadcopters.
+Tested on JJRC H6C, JXD 385/388
+ 
 Manual accelerometer calibration:
  * Quadcopter must be on level surface
  * Quadcopter must be in "not armed" state
@@ -23,6 +25,8 @@ Otherwise the firmware will continue to use the old data.
 Serial Port:
 http://www.rcgroups.com/forums/showthread.php?t=2278850&page=34
 If you can solder real small :)
+
+####Don't forget to edit the config.h for your model. Setup gyro/pid/triggers,etc
 
 Credits
 ======
