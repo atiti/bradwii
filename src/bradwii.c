@@ -695,12 +695,12 @@ lib_serial_sendstring(DEBUGPORT, "\r\n");
             // Lost contact with TX
             // Blink LEDs fast alternating
 						leds_blink_continuous(LED_ALL, 125, 125);
-						//lib_serial_sendstring(DEBUGPORT, "isfailsafeactive true\r\n");
+					  //lib_serial_sendstring(DEBUGPORT, "isfailsafeactive true\r\n");
 
         }
 #ifdef USERSETTINGS_CHECKBOXLEDTOGGLE
 				else if(global.activecheckboxitems & CHECKBOXMASKLEDTOGGLE)  { 
-  					leds_set(LED_NONE);
+ 					leds_set(LED_NONE);
 				    }
 #endif				
         else if(!global.armed) {
@@ -709,6 +709,7 @@ lib_serial_sendstring(DEBUGPORT, "\r\n");
             // Not armed
             // Short blinks
 						leds_blink_continuous(LED_ALL, 50, 450);
+					  
 						}	 
 						else {
             // LEDs stay on
@@ -934,6 +935,7 @@ static void detectstickcommand(void) {
         if(lib_timers_gettimermicroseconds(stickcommandtimer) > 1000000L) {
             // Timeout: last detected stick movement was more than 1 second ago.
             lastrollstickstate = STICK_STATE_START;
+					  rollmovecounter=0;
         }
 
         if(rollmovecounter == 6) {
@@ -942,6 +944,7 @@ static void detectstickcommand(void) {
             // Save in EEPROM
             writeusersettingstoeeprom();
             lastrollstickstate = STICK_STATE_START;
+					  rollmovecounter=0;
         }
     } // if throttle low
 } // checkforstickcommand()
