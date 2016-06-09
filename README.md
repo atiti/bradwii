@@ -1,11 +1,10 @@
-Bradwii for Hubsan H107L v2.3. 
+Bradwii for the Micro Drone 3.0. 
 =======
 
-#### The H107L uses the following hardware
- * Nuvoton MINI54ZDE ARM Cortex-M0
- * AMICCOM A7105 2.5GHz transceiver
- * mCube MC3210 3-Axis Accelerometer
- * InvenSense MPU-3050 3-Axis MEMS Gyroscope
+#### The MD3.0 uses the following hardware
+ * STM32F031K4 ARM Cortex-M0
+ * XN297 2.4GHz transceiver
+ * InvenSense MPU-6050 6-Axis MEMS Gyroscope & Accelerometer
 
 
 Manual accelerometer calibration:

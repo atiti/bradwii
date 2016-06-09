@@ -8,5 +8,7 @@ obj-Mini51/
 *.lst
 /Debug
 .settings/
+*.o
+*.d
 
 us.stackdump

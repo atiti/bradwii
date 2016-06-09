@@ -27,6 +27,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "config_JD385.h"
 #elif defined(X4_BUILD)
 #include "config_X4.h"
+#elif defined(MD3_BUILD)
+#include "config_MD3.h"
 #else
 #include "config_STM32.h"
 #endif

@@ -1,88 +1,93 @@
-#GCC-arm Makefile for bradwii
-#Copyright 2015 pokey9000
-#
-#This program is free software: you can redistribute it and/or modify
-#it under the terms of the GNU General Public License as published by
-#the Free Software Foundation, either version 3 of the License, or
-#any later version.
-#
-#This program is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#GNU General Public License for more details.
-#
-#You should have received a copy of the GNU General Public License
-#along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
+TARGET=bradwii-md3
 
-# Note: lifted from Eclipse generated makefiles
+# Bradwii sources
+OBJS += src/accelerometer.o	\
+	src/autotune.o 		\
+	src/bradwii.o 		\
+	src/checkboxes.o 	\
+	src/eeprom.o 		\
+	src/gyro.o 		\
+	src/imu.o		\
+	src/leds.o 		\
+	src/output.o 		\
+	src/pilotcontrol.o 	\
+	src/serial.o 		\
+	src/rx.o 		\
+	src/vectors.o
 
+# Hardware abstraction layer code
+HAL_OBJS += lib/hal/drv_hal.o 		\
+	    lib/hal/drv_gpio.o 		\
+	    lib/hal/drv_pwm.o		\
+	    lib/hal/drv_serial.o	\
+	    lib/hal/lib_digitalio.o 	\
+	    lib/hal/lib_i2c.o 		\
+	    lib/hal/lib_timers.o 	\
+	    lib/hal/lib_fp.o 		\
+	    lib/hal/lib_serial.o
 
-COPTER="X4"
+# Platform specific code
+STM32F0_OBJS += lib/STM32F0xx_StdPeriph_Driver/src/stm32f0xx_tim.o \
+		lib/STM32F0xx_StdPeriph_Driver/src/stm32f0xx_dma.o \
+		lib/STM32F0xx_StdPeriph_Driver/src/stm32f0xx_rcc.o \
+		lib/STM32F0xx_StdPeriph_Driver/src/stm32f0xx_usart.o \
+		lib/STM32F0xx_StdPeriph_Driver/src/stm32f0xx_misc.o \
+		lib/CMSIS/Device/ST/STM32F0xx/Source/Templates/system_stm32f0xx.o 
 
-ifeq ($(COPTER), "X4")
-MICRO="MINI51"
-endif
+OBJS += $(HAL_OBJS) $(STM32F0_OBJS)
 
-OBJS += src/a7105.o src/accelerometer.o src/autotune.o src/bradwii.o src/checkboxes.o src/eeprom.o src/gyro.o src/imu.o src/leds.o src/output.o src/pilotcontrol.o src/serial.o src/rx_x4.o src/vectors.o 
+STM32F0_INCLUDES = -Isrc/ -Ilib/hal -Ilib/STM32F0xx_StdPeriph_Driver/inc/ -Ilib/CMSIS/Include/ -Ilib/CMSIS/Device/ST/STM32F0xx/Include/
 
-MINI51_OBJS += lib-Mini51/hal/drv_gpio.o lib-Mini51/hal/drv_hal.o lib-Mini51/hal/drv_pwm.o lib-Mini51/hal/drv_serial.o lib-Mini51/hal/lib_adc.o lib-Mini51/hal/lib_digitalio.o lib-Mini51/hal/lib_fp.o lib-Mini51/hal/lib_i2c.o lib-Mini51/hal/lib_serial.o lib-Mini51/hal/lib_soft_3_wire_spi.o lib-Mini51/hal/lib_timers.o 
+# Compiler flags
+CROSS_COMPILE = arm-none-eabi-
+CC = $(CROSS_COMPILE)gcc
+CFLAGS += -mcpu=cortex-m0 -mthumb -Os -ffunction-sections -fno-common -fno-builtin -Wall -g -DMD3_BUILD -DDEBUG_ENABLE_SEMIHOST -DUSE_STDPERIPH_DRIVER
 
-MINI51_OBJS += lib-Mini51/StdDriver/src/adc.o lib-Mini51/StdDriver/src/clk.o lib-Mini51/StdDriver/src/fmc.o lib-Mini51/StdDriver/src/gpio.o lib-Mini51/StdDriver/src/i2c.o lib-Mini51/StdDriver/src/pwm.o lib-Mini51/StdDriver/src/sys.o lib-Mini51/StdDriver/src/timer.o lib-Mini51/StdDriver/src/wdt.o lib-Mini51/StdDriver/src/uart.o
-
-MINI51_OBJS += lib-Mini51/Device/Nuvoton/Mini51Series/Source/system_Mini51Series.o 
-
-MINI51_OBJS += lib-Mini51/startup_Mini51Series.o 
-
-ifeq ($(MICRO), "MINI51")
-OBJS += $(MINI51_OBJS)
-endif
 
 # Add inputs and outputs from these tool invocations to the build variables 
-
-SECONDARY_FLASH += bradwii-x4-gcc.hex
-SECONDARY_SIZE += bradwii-x4-gcc.siz
+SECONDARY_FLASH += $(TARGET).hex
+SECONDARY_SIZE += $(TARGET).siz
 
 # All Target
-all: bradwii-x4-gcc.siz
+all: $(TARGET).siz $(TARGET).hex
 
 # Tool invocations
 
 %.o: %.c
 	@echo 'Building file: $<'
 	@echo 'Invoking: Cross ARM C Compiler'
-	arm-none-eabi-gcc -mcpu=cortex-m0 -mthumb -Os -ffunction-sections -fno-common -fno-builtin -Wall  -g -DX4_BUILD -DDEBUG_ENABLE_SEMIHOST -I"lib-Mini51/hal" -I"src" -I"lib-Mini51/Device/Nuvoton/Mini51Series/Include" -I"lib-Mini51/CMSIS/Include" -I"lib-Mini51/StdDriver/inc" -std=gnu99 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" -c -o "$@" "$<"
+	$(CC) $(CFLAGS) $(STM32F0_INCLUDES) -std=gnu99 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" -c -o "$@" "$<"
 
-bradwii-x4-gcc: $(OBJS) $(USER_OBJS)
+$(TARGET): $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: Cross ARM C Linker'
-	arm-none-eabi-gcc -mcpu=cortex-m0 -mthumb -Os -ffunction-sections -fno-common -fno-builtin -Wall  -g -T "lib-Mini51/linker/memory.ld" -T "lib-Mini51/linker/link.ld" -nostartfiles -Xlinker --gc-sections -Wl,-Map,"bradwii-x4-gcc.map" -o "bradwii-x4-gcc" $(OBJS) $(USER_OBJS) $(LIBS)
+	$(CC) $(CFLAGS) -T lib/stm32.ld -nostartfiles -Xlinker --gc-sections -Wl,-Map,"$(TARGET).map" -o $(TARGET) $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
-bradwii-x4-gcc.hex: bradwii-x4-gcc
+$(TARGET).hex: $(TARGET)
 	@echo 'Invoking: Cross ARM GNU Create Flash Image'
-	arm-none-eabi-objcopy -O ihex --strip-unneeded "bradwii-x4-gcc"  "bradwii-x4-gcc.hex"
+	$(CROSS_COMPILE)objcopy -O ihex --strip-unneeded $(TARGET)  $(TARGET).hex
 	@echo 'Finished building: $@'
 	@echo ' '
 
-bradwii-x4-gcc.siz: bradwii-x4-gcc
+$(TARGET).siz: $(TARGET)
 	@echo 'Invoking: Cross ARM GNU Print Size'
-	arm-none-eabi-size --format=berkeley "bradwii-x4-gcc"
+	$(CROSS_COMPILE)size --format=berkeley $(TARGET)
 	@echo 'Finished building: $@'
 	@echo ' '
 
 # Other Targets
 clean:
-	-rm -f $(SECONDARY_SIZE) $(OBJS) $(OBJS:.o=.d) $(SECONDARY_FLASH) bradwii-x4-gcc bradwii-x4-gcc.map
+	-rm -f $(SECONDARY_SIZE) $(OBJS) $(OBJS:.o=.d) $(SECONDARY_FLASH) $(TARGET) $(TARGET).map
 	-@echo ' '
 
 # TODO: package up openocd changes
-flash: bradwii-x4-gcc
-	-openocd -f target/mini51_stlinkv2.cfg -c "init; halt; flash write_image erase bradwii-x4-gcc 0; reset; shutdown"
+flash: $(TARGET)
+	-openocd -c "init; halt; flash write_image erase $(TARGET) 0; reset; shutdown"
 
 debug:
-	-openocd -f target/mini51_stlinkv2.cfg -c "init; halt; arm semihosting enable; reset run"
+	-openocd -c "init; halt; arm semihosting enable; reset run"
 
 .PHONY: all clean dependents
 .SECONDARY:

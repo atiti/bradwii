@@ -23,7 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 // set control board dependant defines here
 // ======================================================= HUBSAN Q4 / Estes Proto-X / Estes Syncro =====================================================
-#if CONTROL_BOARD_TYPE == CONTROL_BOARD_HUBSAN_Q4
+#if CONTROL_BOARD_TYPE == CONTROL_BOARD_HUBSAN_Q4 || CONTROL_BOARD_TYPE == CONTROL_BOARD_MICRODRONE_30
 
 #define GYRO_TYPE MPU3050       // gyro
 
@@ -71,12 +71,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // LEDs 1 & 3 are tied together
 // LEDs 2 & 4 are tied together
 #ifdef LED1
-	#define LED1_OUTPUT (DIGITALPORT5 | 1)
+	#define LED1_OUTPUT (DIGITALPORTA | 1)
 	#define LED1_ON DIGITALON
 #endif
 
 #ifdef LED2
-	#define LED2_OUTPUT	(DIGITALPORT0 | 4)
+	#define LED2_OUTPUT	(DIGITALPORTA | 4)
 	#define LED2_ON DIGITALON
 #endif
 
@@ -91,12 +91,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #endif
 
 #ifdef LED5
-	#define LED5_OUTPUT	(DIGITALPORT5 | 0)
+	#define LED5_OUTPUT	(DIGITALPORTA | 0)
 	#define LED5_ON DIGITALON
 #endif
 
 #ifdef LED6
-	#define LED6_OUTPUT (DIGITALPORT2 | 6)
+	#define LED6_OUTPUT (DIGITALPORTA | 6)
 	#define LED6_ON DIGITALON
 #endif
 
