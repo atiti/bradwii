@@ -27,11 +27,12 @@ HAL_OBJS += lib/hal/drv_hal.o 		\
 	    lib/hal/lib_serial.o
 
 # Platform specific code
-STM32F0_OBJS += lib/STM32F0xx_StdPeriph_Driver/src/stm32f0xx_tim.o \
-		lib/STM32F0xx_StdPeriph_Driver/src/stm32f0xx_dma.o \
-		lib/STM32F0xx_StdPeriph_Driver/src/stm32f0xx_rcc.o \
-		lib/STM32F0xx_StdPeriph_Driver/src/stm32f0xx_usart.o \
-		lib/STM32F0xx_StdPeriph_Driver/src/stm32f0xx_misc.o \
+STM32F0_OBJS += lib/startup_stm32f0xx.o 						\
+		lib/STM32F0xx_StdPeriph_Driver/src/stm32f0xx_tim.o 			\
+		lib/STM32F0xx_StdPeriph_Driver/src/stm32f0xx_dma.o 			\
+		lib/STM32F0xx_StdPeriph_Driver/src/stm32f0xx_rcc.o 			\
+		lib/STM32F0xx_StdPeriph_Driver/src/stm32f0xx_usart.o 			\
+		lib/STM32F0xx_StdPeriph_Driver/src/stm32f0xx_misc.o 			\
 		lib/CMSIS/Device/ST/STM32F0xx/Source/Templates/system_stm32f0xx.o 
 
 OBJS += $(HAL_OBJS) $(STM32F0_OBJS)
