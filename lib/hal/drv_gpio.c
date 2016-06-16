@@ -1,35 +1,52 @@
 #include "hal.h"
+#include "stm32f0xx_gpio.h"
+#include "lib_serial.h"
+
+#define DEBUGPORT SEMIHOSTPORTNUMBER
 
 void gpioInit(GPIO_TypeDef *gpio, gpio_config_t *config)
 {
-/*    uint32_t pinpos;
+    uint32_t pinpos;
+    GPIO_InitTypeDef GPIO_InitStructure;
+
+    GPIO_StructInit(&GPIO_InitStructure);
+
     for (pinpos = 0; pinpos < 16; pinpos++) {
-        // are we doing this pin?
         if (config->pin & (0x1 << pinpos)) {
-            // reference CRL or CRH, depending whether pin number is 0..7 or 8..15
-            __IO uint32_t *cr = &gpio->CRL + (pinpos / 8);
-            // mask out extra bits from pinmode, leaving just CNF+MODE
-            uint32_t currentmode = config->mode & 0x0F;
-            // offset to CNF and MODE portions of CRx register
-            uint32_t shift = (pinpos % 8) * 4;
-            // Read out current CRx value
-            uint32_t tmp = *cr;
-            // if we're in output mode, add speed too.
-            if (config->mode & 0x10)
-                currentmode |= config->speed;
-            // Mask out 4 bits
-            tmp &= ~(0xF << shift);
-            // apply current pinmode
-            tmp |= currentmode << shift;
-            *cr = tmp;
-            // Special handling for IPD/IPU
-            if (config->mode == Mode_IPD) {
-                gpio->ODR &= ~(1U << pinpos);
-            } else if (config->mode == Mode_IPU) {
-                gpio->ODR |= (1U << pinpos);
+            // FIXME: We need to skip some pins otherwise the hardware would lock up...
+	    if (DEBUGPORT &&
+                ((gpio == GPIOA &&
+                (pinpos == 0  ||
+                 pinpos == 13 ||
+                 pinpos == 14)) ||
+                (gpio == GPIOB && pinpos > 7))) {
+                continue;
+	    }
+            GPIO_InitStructure.GPIO_Pin = (0x1 << pinpos);
+            GPIO_InitStructure.GPIO_Mode = config->mode;
+            GPIO_InitStructure.GPIO_Speed = config->speed;
+
+	    // Special handling for converting GPIO modes from stm32f1 to f0
+	    switch (config->mode) {
+                case Mode_IN_FLOATING:
+                    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
+                    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
+                    break;
+                case Mode_Out_PP:
+                    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
+                    GPIO_InitStructure.GPIO_OType = GPIO_OType_PP; 
+                    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
+                    break;
+                case Mode_Out_OD:
+                    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
+                    GPIO_InitStructure.GPIO_OType = GPIO_OType_OD; 
+                    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
+                    break;
+                default:
+                    break;
             }
+
+            GPIO_Init(GPIOA, &GPIO_InitStructure);     
         }
     }
-*/
-// FIXME: ????
 }

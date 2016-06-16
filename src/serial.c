@@ -418,7 +418,6 @@ void serialcheckportforactiontest(char portnumber)
 #endif
 
 #if (MULTIWII_CONFIG_SERIAL_PORTS!=NOSERIALPORT) || defined(DEBUGPORT)
-
 void serialprintnumber(char portnumber, long num, int digits, int decimals, char usebuffer)
    // prints a int number, right justified, using digits # of digits, puting a
    // decimal decimals places from the end, and using blank

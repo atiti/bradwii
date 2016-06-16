@@ -69,7 +69,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // Be sure to uncomment and set the baud rate for any enabled serial ports.
 // note: two examples are given below, but any combination of ports can be added together.
 
-//#define MULTIWII_CONFIG_SERIAL_PORTS NOSERIALPORT
+#define MULTIWII_CONFIG_SERIAL_PORTS NOSERIALPORT
 //#define MULTIWII_CONFIG_SERIAL_PORTS SERIALPORT1
 //#define MULTIWII_CONFIG_SERIAL_PORTS SERIALPORT1+SERIALPORT3
 
@@ -79,7 +79,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //#define SERIAL_3_BAUD 115200
 
 // Choose whether to include code for a GPS and set parameters for the GPS, otherwise it will default o what the control board come with
-//#define GPS_TYPE NO_GPS // select if no GPS is going to be used
+#define GPS_TYPE NO_GPS // select if no GPS is going to be used
 //#define GPS_TYPE I2C_GPS // select if an i2c gps is going to be used
 //#define GPS_TYPE SERIAL_GPS   // select if a serial GPS (NMEA) is going to be used
 //#define GPS_SERIAL_PORT 2
@@ -121,14 +121,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define STICK_RANGE_HIGH 1830
 
 // un-comment if you don't want to include code for a compass, otherwise it will default to what the control board has on it
-//#define COMPASS_TYPE NO_COMPASS
+#define COMPASS_TYPE NO_COMPASS
 //#define COMPASS_TYPE HMC5883
 //#define COMPASS_TYPE HMC5843
 //#define COMPASS_TYPE MAG3110
 //#define COMPASS_ORIENTATION(VALUES,X, Y, Z) {VALUES[ROLLINDEX]  =  X; VALUES[PITCHINDEX]  = Y; VALUES[YAWINDEX]  = -Z;}
 
 // un-comment if you don't want to include code for a barometer, otherwise it will default to what the control board has on it
-//#define BAROMETER_TYPE NO_BAROMETER
+#define BAROMETER_TYPE NO_BAROMETER
 
 // Get your magnetic decliniation from here : http://magnetic-declination.com/
 #define MAG_DECLINATION_DEGREES  -13.4  // for Hyde Park, NY
@@ -179,7 +179,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 // Parameters for leds_set()
 #define LED1 LED1_STATE			//0x01
-#define LED2 LED2_STATE 		//0x02
+//#define LED2 LED2_STATE 		//0x02
 // #define LED3 LED3_STATE 	//0x04
 // #define LED4 LED4_STATE	//0x08
 // #define LED5 LED5_STATE	//0x10

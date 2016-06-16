@@ -2,21 +2,23 @@
 
 typedef enum
 {
-    Mode_AIN = 0x0,
-    Mode_IN_FLOATING = 0x04,
-    Mode_IPD = 0x28,
-    Mode_IPU = 0x48,
-    Mode_Out_OD = 0x14,
-    Mode_Out_PP = 0x10,
-    Mode_AF_OD = 0x1C,
-    Mode_AF_PP = 0x18
+  Mode_IN   = 0x00,  /*!< GPIO Input Mode                */
+  Mode_OUT  = 0x01,  /*!< GPIO Output Mode               */
+  Mode_AF   = 0x02,  /*!< GPIO Alternate function Mode   */
+  Mode_AN   = 0x03,  /*!< GPIO Analog In/Out Mode        */
+  Mode_AF_PP = 0x00, /** Not supported, setting to input */
+  Mode_IPD  = 0x00,  /** Not supported, setting to input */
+  Mode_IPU  = 0x00,   /** Not supported, setting to input */
+  Mode_IN_FLOATING  = 0x07,   /** Not supported, setting to input */
+  Mode_Out_PP  = 0x08,   /** Not supported, setting to input */
+  Mode_Out_OD = 0x09  /** Not supported setting to input */
 } GPIO_Mode;
 
 typedef enum
 {
-    Speed_10MHz = 1,
-    Speed_2MHz,
-    Speed_50MHz
+    Speed_10MHz = 0x01,
+    Speed_2MHz = 0x02,
+    Speed_50MHz = 0x03
 } GPIO_Speed;
 
 typedef enum

@@ -82,7 +82,7 @@ m
 // library headers
 #include "hal.h"
 #include "lib_timers.h"
-#if (MULTIWII_CONFIG_SERIAL_PORTS != NOSERIALPORT) || (DEBUGPORT == 6)
+#if (MULTIWII_CONFIG_SERIAL_PORTS != NOSERIALPORT) || defined(DEBUGPORT)
 #include "lib_serial.h"
 #endif
 #include "lib_i2c.h"
@@ -135,6 +135,7 @@ static void detectstickcommand(void);
 int main(void)
 {
 
+    lib_serial_sendstring(DEBUGPORT, "HELLO WORLD from main()\n");
 #if (BATTERY_ADC_CHANNEL != NO_ADC)
     // Static to keep it off the stack
     static bool isbatterylow;         // Set to true while voltage is below limit
@@ -148,47 +149,56 @@ int main(void)
     // Initial bandgap voltage [V]. We measure this once when there is no load on the battery
     // because the specified tolerance for this is pretty high.
     static fixedpointnum initialbandgapvoltage;
-		// Enables battery low indicator after the voltage droped under the specified limit for a amount of time
-		unsigned long batterylowtimer;
+    // Enables battery low indicator after the voltage droped under the specified limit for a amount of time
+    unsigned long batterylowtimer;
 		
-		// this is a casting problem between enum/int?
-	  static lib_adc_channel_t adc_bat_channel = BATTERY_ADC_CHANNEL;
+    // this is a casting problem between enum/int?
+    static lib_adc_channel_t adc_bat_channel = BATTERY_ADC_CHANNEL;
 #endif
 	
     static bool isfailsafeactive;     // true while we don't get new data from transmitter
+    lib_serial_sendstring(DEBUGPORT, "before hal_init()\n");
 		
     // initialize hardware
-		lib_hal_init();
+    lib_hal_init();
 
+    lib_serial_sendstring(DEBUGPORT, "hal_init()\n");
     //initialize the libraries that require initialization
     lib_timers_init();
+    lib_serial_sendstring(DEBUGPORT, "timers_init()\n");
     lib_i2c_init();
+    lib_serial_sendstring(DEBUGPORT, "i2c_init()\n");
 	
-		//initialize the leds
-		leds_init();		
+    //initialize the leds
+    leds_init();		
+    lib_serial_sendstring(DEBUGPORT, "leds_init()\n");
 		
-		// start with default user settings in case there's nothing in eeprom
-		defaultusersettings();		
+    // start with default user settings in case there's nothing in eeprom
+    defaultusersettings();
+    lib_serial_sendstring(DEBUGPORT, "defaultusersettings()\n");
     
     // try to load usersettings from eeprom
     readusersettingsfromeeprom();
+    lib_serial_sendstring(DEBUGPORT, "readusersettingsfromeeprom()\n");
 
     if(!global.usersettingsfromeeprom) {
-			// If nothing found in EEPROM (= data flash on Mini51)
-			// use default settings.
-			// start with default user settings in case there's nothing in eeprom
-			defaultusersettings();
-		
-			// Indicate that default settings are used
-			leds_blink_cycles(LED1, 100, 100, 10);
+        // If nothing found in EEPROM (= data flash on Mini51)
+        // use default settings.
+        // start with default user settings in case there's nothing in eeprom
+        defaultusersettings();
+	lib_serial_sendstring(DEBUGPORT, "loaded default from eeprom\n");	
+        // Indicate that default settings are used
+        leds_blink_cycles(LED1, 100, 100, 10);
     }
 
 	
     // pause a moment before initializing everything. To make sure everything is powered up
     lib_timers_delaymilliseconds(100); 
+    lib_serial_sendstring(DEBUGPORT, "bit of delay\n");
 		
     // initialize all other modules
     initrx();
+    lib_serial_sendstring(DEBUGPORT, "init_rx()\n");
 		
 #if (BATTERY_ADC_CHANNEL != NO_ADC)
     // Give the battery voltage lowpass filter a reasonable starting point.
@@ -196,14 +206,17 @@ int main(void)
     lib_adc_init();  // For battery voltage
 #endif
    
-		initoutputs();
+    initoutputs();
+    lib_serial_sendstring(DEBUGPORT, "init_outputs()\n");
 
 #if (MULTIWII_CONFIG_SERIAL_PORTS != NOSERIALPORT)
     serialinit();
 #endif
 
     initgyro();
+    lib_serial_sendstring(DEBUGPORT, "init_gyro()\n");
     initacc();
+    lib_serial_sendstring(DEBUGPORT, "init_acc()\n");
 
 #if (BAROMETER_TYPE != NO_BAROMETER)
     initbaro();
@@ -217,25 +230,26 @@ int main(void)
     initgps();
 #endif
     
-		initimu();
+    initimu();
+    lib_serial_sendstring(DEBUGPORT, "init_imu()\n");
 		
 #if 0
 lib_serial_sendstring(DEBUGPORT, "PID P=");
-serialprintfixedpoint_no_linebreak(0, usersettings.pid_pgain[PITCHINDEX]); 
+serialprintfixedpoint_no_linebreak(DEBUGPORT, usersettings.pid_pgain[PITCHINDEX]); 
 lib_serial_sendstring(DEBUGPORT, " I=");
-serialprintfixedpoint_no_linebreak(0, usersettings.pid_igain[PITCHINDEX]);
+serialprintfixedpoint_no_linebreak(DEBUGPORT, usersettings.pid_igain[PITCHINDEX]);
 lib_serial_sendstring(DEBUGPORT, " D=");
-serialprintfixedpoint_no_linebreak(0, usersettings.pid_dgain[PITCHINDEX]);
+serialprintfixedpoint_no_linebreak(DEBUGPORT, usersettings.pid_dgain[PITCHINDEX]);
 lib_serial_sendstring(DEBUGPORT, "\r\n");
 #endif
 #if (BATTERY_ADC_CHANNEL != NO_ADC)
-		// Measure internal bandgap voltage now.
+    // Measure internal bandgap voltage now.
     // Battery is probably full and there is no load,
     // so we can expect to have a good external ADC reference
     // voltage now.
     lib_adc_select_channel(LIB_ADC_CHANREF);
     initialbandgapvoltage = 0;
-		batterylowtimer  = 0;		
+    batterylowtimer  = 0;		
     isbatterylow = false;	
 		
     // Take average of 8 measurements
@@ -251,52 +265,31 @@ lib_serial_sendstring(DEBUGPORT, "\r\n");
     isadcchannelref = false;
     lib_adc_select_channel(adc_bat_channel);
     lib_adc_startconv();
-		#if (BATTERY_ADC_DEBUG)
-		while(lib_adc_is_busy()){
-		}
-		batteryvoltageraw = lib_adc_read_raw();
+    #if (BATTERY_ADC_DEBUG)
+    while(lib_adc_is_busy()){}
+    batteryvoltageraw = lib_adc_read_raw();
 		
-		lib_serial_sendstring(DEBUGPORT, "POWER ON ADC MEASURMENTS:================\r\n");
-		lib_serial_sendstring(DEBUGPORT, "BANDGAP=");
-		serialprintfixedpoint_no_linebreak(0, initialbandgapvoltage);
-		lib_serial_sendstring(DEBUGPORT, "\r\nBGAPVOLTAGERAW=");
-		serialprintfixedpoint_no_linebreak(0, bandgapvoltageraw);
-		lib_serial_sendstring(DEBUGPORT, "\r\nBATTERY RAW=");
-		serialprintfixedpoint_no_linebreak(0, batteryvoltageraw);
-		lib_serial_sendstring(DEBUGPORT, "=========================================\r\n");
-		lib_timers_delaymilliseconds(2000);
-	#endif
+    lib_serial_sendstring(DEBUGPORT, "POWER ON ADC MEASURMENTS:================\r\n");
+    lib_serial_sendstring(DEBUGPORT, "BANDGAP=");
+    serialprintfixedpoint_no_linebreak(0, initialbandgapvoltage);
+    lib_serial_sendstring(DEBUGPORT, "\r\nBGAPVOLTAGERAW=");
+    serialprintfixedpoint_no_linebreak(0, bandgapvoltageraw);
+    lib_serial_sendstring(DEBUGPORT, "\r\nBATTERY RAW=");
+    serialprintfixedpoint_no_linebreak(0, batteryvoltageraw);
+    lib_serial_sendstring(DEBUGPORT, "=========================================\r\n");
+    lib_timers_delaymilliseconds(2000);
+    #endif
 #endif
     // set the default i2c speed to 400 kHz.  If a device needs to slow it down, it can, but it should set it back.
     lib_i2c_setclockspeed(I2C_400_KHZ);
+    lib_serial_sendstring(DEBUGPORT, "i2c_setclockspeed()\n");
 
     global.armed = 0;
     global.navigationmode = NAVIGATIONMODEOFF;
     global.failsafetimer = lib_timers_starttimer();
 		
-
-		/*
-		//testcode to see if uart works
-		unsigned int led_state = 0;
-		for (;;) {
-			//lib_serial_sendchar(0, 'H');
-			char x = lib_serial_numcharsavailable(0);
-			//lib_serial_sendchar(0, '0'+x);
-			if (x != 0){
-				lib_serial_sendstring(DEBUGPORT, "POWER ON ADC MEASURMENTS:================\r\n");
-			  unsigned char c = lib_serial_getchar(0);
-				lib_serial_sendchar(0, c);
-				lib_serial_sendchar(0, '\r');
-				lib_serial_sendchar(0, '\n');
-			}
-			leds_set(led_state);
-			led_state = 0xFF-led_state;
-			lib_timers_delaymilliseconds(1);
-		}
-		*/
-		
     for (;;) {
-
+    	//lib_serial_sendstring(DEBUGPORT, "mainloop()\n");
         // check to see what switches are activated
         checkcheckboxitems();
 
@@ -314,6 +307,7 @@ lib_serial_sendstring(DEBUGPORT, "\r\n");
             if (!global.armed) {
                 if (global.activecheckboxitems & CHECKBOXMASKARM) {
                     global.armed = 1;
+		    lib_serial_sendstring(DEBUGPORT, "armed!\n");
 #if (GPS_TYPE!=NO_GPS)
                     navigation_sethometocurrentlocation();
 #endif
@@ -358,7 +352,7 @@ lib_serial_sendstring(DEBUGPORT, "\r\n");
         // read the receiver
         readrx();
 		
-	        // turn on the LED when we are stable and the gps has 5 satellites or more
+	// turn on the LED when we are stable and the gps has 5 satellites or more
 #if (GPS_TYPE==NO_GPS)
 #if (GPS_LED != NONE)
 	leds_set(((global.stable == 0) ? (!GPS_LED) : GPS_LED));
@@ -401,14 +395,14 @@ lib_serial_sendstring(DEBUGPORT, "\r\n");
             if (!(global.previousactivecheckboxitems & CHECKBOXMASKAUTOTUNE)) {
                 autotune(angleerror, AUTOTUNESTARTING); // tell autotune that we just started autotuning
 #if defined(DEBUGPORT)
-			lib_serial_sendstring(DEBUGPORT, "AT START\n");
+                lib_serial_sendstring(DEBUGPORT, "AT START\n");
 #endif
-		}
-            else
+            } else {
                 autotune(angleerror, AUTOTUNETUNING);   // tell autotune that we are in the middle of autotuning
+            }
         } else if (global.previousactivecheckboxitems & CHECKBOXMASKAUTOTUNE) {
 #if defined(DEBUGPORT)
-			lib_serial_sendstring(DEBUGPORT, "AT STOP\n");
+            lib_serial_sendstring(DEBUGPORT, "AT STOP\n");
 #endif
             autotune(angleerror, AUTOTUNESTOPPING);     // tell autotune that we just stopped autotuning
 	}
@@ -640,44 +634,39 @@ lib_serial_sendstring(DEBUGPORT, "\r\n");
                 // Use constant FIXEDPOINTONEOVERONEFOURTH instead of FIXEDPOINTONEOVERONEHALF
                 // Because we call this only every other iteration.
                 // (...alternatively multiply global.timesliver by two).      
-								lib_fp_lowpassfilter(&(global.batteryvoltage), batteryvoltage, global.timesliver, FIXEDPOINTONEOVERONEFOURTH, TIMESLIVEREXTRASHIFT);	
+		lib_fp_lowpassfilter(&(global.batteryvoltage), batteryvoltage, global.timesliver, FIXEDPOINTONEOVERONEFOURTH, TIMESLIVEREXTRASHIFT);	
 
 #if (BATTERY_ADC_DEBUG)
-	lib_serial_sendstring(DEBUGPORT, "\r\nBANDGAP=");
-	serialprintfixedpoint_no_linebreak(0, bandgapvoltageraw);
-	lib_serial_sendstring(DEBUGPORT, " BATTERY RAW=");
-	serialprintfixedpoint_no_linebreak(0, batteryvoltageraw);
-	lib_serial_sendstring(DEBUGPORT, " BATTERY=");
-	serialprintfixedpoint_no_linebreak(0, batteryvoltage);
-	lib_serial_sendstring(DEBUGPORT, " FILTERED BAT=");
-	serialprintfixedpoint_no_linebreak(0, global.batteryvoltage);
+	        lib_serial_sendstring(DEBUGPORT, "\r\nBANDGAP=");
+	        serialprintfixedpoint_no_linebreak(0, bandgapvoltageraw);
+	        lib_serial_sendstring(DEBUGPORT, " BATTERY RAW=");
+	        serialprintfixedpoint_no_linebreak(0, batteryvoltageraw);
+	        lib_serial_sendstring(DEBUGPORT, " BATTERY=");
+	        serialprintfixedpoint_no_linebreak(0, batteryvoltage);
+	        lib_serial_sendstring(DEBUGPORT, " FILTERED BAT=");
+	        serialprintfixedpoint_no_linebreak(0, global.batteryvoltage);
 #endif							
 								
-							  // Start timer if battery is below limit
+                // Start timer if battery is below limit
                 if(global.batteryvoltage < FP_BATTERY_UNDERVOLTAGE_LIMIT) {
-									 if(batterylowtimer == 0) batterylowtimer = lib_timers_starttimer();
-								}
-								else // if battery is above limit reset batterylowtimer
-								{
-									batterylowtimer = 0;
-								}
-								
-						}
+                    if(batterylowtimer == 0) batterylowtimer = lib_timers_starttimer();
+                }
+                else // if battery is above limit reset batterylowtimer
+	        {
+                    batterylowtimer = 0;
+	        }						
+	    }
             // Start next conversion
             lib_adc_startconv();
         } // IF ADC result available			
 				
-							if (batterylowtimer !=0)
-				{
-				// Its working now. tested on hubsan.
-        unsigned int time = lib_timers_gettimermicroseconds(batterylowtimer);
-			  if (time > BATTERY_LOW_TIMER * 1000L) isbatterylow = true;
-				}
+        if (batterylowtimer !=0) {
+            // Its working now. tested on hubsan.
+            unsigned int time = lib_timers_gettimermicroseconds(batterylowtimer);
+            if (time > BATTERY_LOW_TIMER * 1000L) isbatterylow = true;
+        }
 
-		//		if (!(lib_timers_gettimermicroseconds(batterylowtimer) > BATTERY_LOW_TIMER * 1000L)) isbatterylow = true;
-
-				
-
+        //		if (!(lib_timers_gettimermicroseconds(batterylowtimer) > BATTERY_LOW_TIMER * 1000L)) isbatterylow = true;
         // Decide what LEDs have to show
         if(isbatterylow) {
             // Highest priority: Battery voltage
@@ -702,15 +691,14 @@ lib_serial_sendstring(DEBUGPORT, "\r\n");
 	}
 #endif	
         else if(!global.armed) {
-					  //lib_serial_sendstring(DEBUGPORT, "isfailsafeactive false\r\n");
-
+	    //lib_serial_sendstring(DEBUGPORT, "isfailsafeactive false\r\n");
             // Not armed
             // Short blinks
-						leds_blink_continuous(LED_ALL, 50, 450);
-						}
+            //leds_blink_continuous(LED_ALL, 50, 450);
+	}
         else {
             // LEDs stay on
-						leds_set(LED_ALL);
+            leds_set(LED_ALL);
         }
 				
     } // Endless loop

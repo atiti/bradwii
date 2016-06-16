@@ -23,7 +23,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 // set control board dependant defines here
 // ======================================================= HUBSAN Q4 / Estes Proto-X / Estes Syncro =====================================================
-#if CONTROL_BOARD_TYPE == CONTROL_BOARD_HUBSAN_Q4 || CONTROL_BOARD_TYPE == CONTROL_BOARD_MICRODRONE_30
+#if CONTROL_BOARD_TYPE == CONTROL_BOARD_HUBSAN_Q4
+
+#define DEBUGPORT 6             // semihosting through SWD
 
 #define GYRO_TYPE MPU3050       // gyro
 
@@ -100,7 +102,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 	#define LED6_ON DIGITALON
 #endif
 
-#define DEBUGPORT 6
 // end of Hubsan Q4 defs
 
 // ======================================================= HUBSAN H107L ===============================================================
@@ -301,6 +302,69 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #ifdef LED4
 	#define LED4_OUTPUT	LED2_OUTPUT
+	#define LED4_ON LED2_ON
+#endif
+// ======================================================= MicroDrone 3.0 ===============================================================
+#elif CONTROL_BOARD_TYPE == CONTROL_BOARD_MICRODRONE_30
+#define DEBUGPORT 6
+
+#define GYRO_TYPE MPU6050       // gyro
+#define GYRO_ORIENTATION(VALUES,X, Y, Z) {VALUES[ROLLINDEX] =  -X; VALUES[PITCHINDEX] = -Y; VALUES[YAWINDEX] = -Z;}
+
+#define ACCELEROMETER_TYPE MPU6050      // accelerometer
+#define ACC_ORIENTATION(VALUES,X, Y, Z)  {VALUES[ROLLINDEX]  = -Y; VALUES[PITCHINDEX]  = X; VALUES[YAWINDEX]  =  Z;}
+
+#ifndef COMPASS_TYPE
+#define COMPASS_TYPE NO_COMPASS
+#endif
+
+#ifndef BAROMETER_TYPE
+#define BAROMETER_TYPE NO_BAROMETER
+#endif
+
+//#ifndef MULTIWII_CONFIG_SERIAL_PORTS
+//#define MULTIWII_CONFIG_SERIAL_PORTS SERIALPORT0
+//#endif
+
+#ifndef GPS_TYPE
+#define GPS_TYPE NO_GPS
+#endif
+
+#define RXNUMCHANNELS 8
+
+#ifndef ARMED_MIN_MOTOR_OUTPUT
+#define ARMED_MIN_MOTOR_OUTPUT 1015     // motors spin slowly when armed
+#endif
+
+#ifndef THROTTLE_TO_MOTOR_OFFSET
+#define THROTTLE_TO_MOTOR_OFFSET 0      // motors spin slowly when armed
+#endif
+// by default don't allow the motors to stop when armed if not in acro or semi acro mode
+#ifndef MOTORS_STOP
+#define MOTORS_STOP NO
+#endif
+
+// LED Outputs (2)
+// LEDs 1 & 3 are tied together
+// LEDs 2 & 4 are tied together
+#ifdef LED1
+	#define LED1_OUTPUT (DIGITALPORTA | 1)
+	#define LED1_ON DIGITALON
+#endif
+
+// These LEDs are not populated on the PCB
+#ifdef LED2
+	#define LED2_OUTPUT	(DIGITALPORTA | 2)
+	#define LED2_ON DIGITALOFF
+#endif
+
+#ifdef LED3
+	#define LED3_OUTPUT LED1_OUTPUT
+	#define LED3_ON LED1_ON
+#endif
+
+#ifdef LED4
+	#define LED4_OUTPUT LED2_OUTPUT
 	#define LED4_ON LED2_ON
 #endif
 

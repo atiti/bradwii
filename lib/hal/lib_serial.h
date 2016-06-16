@@ -22,6 +22,7 @@ void lib_serial_initport(unsigned char serialportnumber,long baud);
 void lib_serial_sendchar(unsigned char serialportnumber,unsigned char c);
 void lib_serial_sendstring(unsigned char serialportnumber,char *string);
 void lib_serial_senddata(unsigned char serialportnumber,unsigned char *data,int datalength);
+void lib_serial_sendhex(unsigned char serialportnumber, void *data);
 int lib_serial_numcharsavailable(unsigned char serialportnumber);
 unsigned char lib_serial_getchar(unsigned char serialportnumber);
 void lib_serial_getdata(unsigned char serialportnumber,unsigned char *data,int datalength);
@@ -30,5 +31,5 @@ int lib_serial_availableoutputbuffersize(unsigned char serialportnumber);
 typedef void (* serialcallbackfunctptr)(unsigned char c);
 void lib_serial_setrxcallback(unsigned char serialportnumber,serialcallbackfunctptr callback);
 
-
+#define SEMIHOSTPORTNUMBER 6
 #define USBPORTNUMBER 5

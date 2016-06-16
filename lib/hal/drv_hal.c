@@ -17,16 +17,15 @@ void lib_hal_init(void)
     //RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2 | RCC_APB1Periph_TIM3 | RCC_APB1Periph_TIM4 | RCC_APB1Periph_I2C2, ENABLE);
     //RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO | RCC_APB2Periph_GPIOA | RCC_APB2Periph_GPIOB | RCC_APB2Periph_GPIOC | RCC_APB2Periph_TIM1 | RCC_APB2Periph_ADC1 | RCC_APB2Periph_USART1, ENABLE);
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2 | RCC_APB1Periph_TIM3 | RCC_APB1Periph_I2C2, ENABLE);
-    RCC_APB2PeriphClockCmd(RCC_AHBPeriph_GPIOA | RCC_AHBPeriph_GPIOB | RCC_AHBPeriph_GPIOC | RCC_APB2Periph_TIM1 | RCC_APB2Periph_ADC1 | RCC_APB2Periph_USART1, ENABLE);
-    RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1 | RCC_APB2Periph_ADC1 | RCC_APB2Periph_USART1, ENABLE);
+    RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOA | RCC_AHBPeriph_GPIOB | RCC_AHBPeriph_DMA1, ENABLE);
     RCC_ClearFlag();
 
     // Make all GPIO in by default to save power and reduce noise
     gpio.pin = Pin_All;
-    gpio.mode = Mode_AIN;
+    gpio.mode = Mode_IN;
     gpioInit(GPIOA, &gpio);
     gpioInit(GPIOB, &gpio);
-    gpioInit(GPIOC, &gpio);
 
     pwm.airplane = false;
     pwm.useUART = false;
@@ -37,7 +36,7 @@ void lib_hal_init(void)
     pwm.motorPwmRate = 498;
     pwm.servoPwmRate = 50;
 
-    pwmInit(&pwm);
+    //pwmInit(&pwm);
 }
 
 #ifndef FLASH_PAGE_COUNT
